@@ -1,0 +1,35 @@
+﻿
+@page "/catalog" 
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Threading.Tasks
+@using InstaRent.Catalog.TotalClicks
+@using InstaRent.BlazorApp.Shared.Dto
+@inject HttpClient Http 
+<h3>Catalog List</h3>
+
+<div>
+    @if(bagsList!=null)
+    @foreach (TotalClickWithNavigationPropertiesDto mVisitedBags in bagsList)
+    {
+        <p>@mVisitedBags.Bag.bag_name</p>
+    }
+    else
+    {
+        <p>Loading....</p>
+    }
+</div>
+
+@code {
+
+    private List<TotalClickWithNavigationPropertiesDto> bagsList;
+
+    private PagedResultDto<TotalClickWithNavigationPropertiesDto>? cataloglist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cataloglist = await Http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>("api/catalog/most-visited");
+        if (cataloglist.items.Count > 0)
+            bagsList = cataloglist.items.ToList();
+    }
+}
