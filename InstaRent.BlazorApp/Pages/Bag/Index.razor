@@ -23,42 +23,66 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th></th>
-                    @*<th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>*@
-                    <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
-                    <th>Description <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "description"))" /></th>
-                    <th>Tags <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "tag"))" /></th>
-                    <th>Status <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "status"))" /></th>
-                    <th>Price</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th></th>
+                    <th colspan="4">
+                        <div>
+                            <input type="radio" id="BagName" @onchange=@(()=>OnValueChange(NameVal)) checked="@(Value==@NameVal)">
+                            <label for="BagName">Name</label>|
+                            <input type="radio" id="Description" @onchange=@(()=>OnValueChange(DescriptionVal)) checked="@(Value==@DescriptionVal)">
+                            <label for="Description">Description</label>|
+                            <input type="radio" id="Tags" @onchange=@(()=>OnValueChange(TagsVal)) checked="@(Value==@TagsVal)">
+                            <label for="Tags">Tag</label>|
+                            <input type="radio" id="Status" @onchange=@(()=>OnValueChange(StatusVal)) checked="@(Value==@StatusVal)">
+                            <label for="Status">Status</label>
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="4">
+                        <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, Value))" />
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var info in bags)
                 {
                 <tr>
-                   @* @if (string.IsNullOrEmpty(info.image_urls))
-                    {
-                        <td></td>
-                    }
-                    else
-                    {
-                        <td><img class="rounded m-0 h-auto w-auto" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
-                    }*@
-                    <td></td>
-                    <td>@info.bag_name</td>
-                    <td>@info.description</td>
-                    <td></td>
-                    <td>@info.status</td>
-                    <td>@info.price</td>
-                    <td>@info.rental_start_date.Date.ToString("yyyyy-MM-dd")</td>
-                    <td>@info.rental_start_date.Date.ToString("yyyyy-MM-dd")</td>
+                    <th colspan="4"><h4>@info.bag_name</h4></th> 
+                </tr>
+                <tr>
                     <td>
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
-                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                        @foreach(var img in info.image_urls)
+                        {
+                            <img class="m-auto" src="@img" width="50" height="50" alt="@info.bag_name" />
+                        }
+                        <br>
+                        <ul>
+                            @foreach (var tag in info.tags)
+                            {
+                                <li>@tag</li>
+                            }
+                        </ul>
                     </td>
+                    <td>
+                        @info.description
+                            <br>
+                            <div class="m-auto">
+                                Start Date: @info.rental_start_date.Date.ToString("yyyyy-MM-dd") |
+                                End Date: @info.rental_start_date.Date.ToString("yyyyy-MM-dd")
+                            </div>
+                    </td>
+                    <td colspan="2">
+                        <div class="m-auto">
+                                @info.status
+                                <br>
+                                <h5 class="modal-sm">
+                                    @info.price SGD
+                                </h5>      
+                                <br>                                
+                                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                                <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+
+                        </div>
+                     </td>
                 </tr>
                 }
             </tbody>
@@ -72,12 +96,29 @@ else
 }
 
 @code {
+    string NameVal = "Name";
+    string DescriptionVal = "Description";
+    string TagsVal = "Tags";
+    string StatusVal = "Status";
+
     public MetaData MetaData { get; set; } = new MetaData();
     private PageParameters _pageParameters = new PageParameters() { PageSize = 10};
     private List<BagDto> bags;
     public bool Show { get; set; } = false;
     int _tempId = 0;
     string _name, _description, _tag, _status;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Value { get; set; }
+
+    private void OnValueChange(string val)
+    {
+        Value = val;
+        ValueChanged.InvokeAsync(val);
+    }
 
     void OnAddNew()
     {
@@ -118,13 +159,16 @@ else
 
     async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
     {
-        switch (columnTitle)
+        switch (columnTitle.ToLower())
         {
             case "name":
                 _name = changeEventArgs.Value.ToString();
                 break;
             case "description":
                 _description = changeEventArgs.Value.ToString();
+                break;
+            case "tags":
+                _tag = changeEventArgs.Value.ToString();
                 break;
             case "status":
                 _status = changeEventArgs.Value.ToString();
@@ -159,6 +203,7 @@ else
     {
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
         _description = string.IsNullOrEmpty(_description) ? string.Empty : _description;
+        _tag = string.IsNullOrEmpty(_tag) ? string.Empty : _tag;
         _status = string.IsNullOrEmpty(_status) ? string.Empty : _status;
 
         await _bagService.GetListByUserId(parameters.PageNumber, "", _name, _description, _tag, _status);

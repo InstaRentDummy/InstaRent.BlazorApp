@@ -6,6 +6,7 @@
 @using InstaRent.BlazorApp.Components
 @inject IBagService _bagService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 
 <h3>Bag Entry</h3>
 
@@ -47,6 +48,19 @@ else
             </div>
         </div>
         <div class="col-12 row mt-2">
+            <label for="Tags" class="col-md-2 col-form-label">Tags:</label>
+            <div>
+            <InputText id="tag" class="form-control" @bind-Value="tag" />
+            <button type="button" class="btn btn-outline-secondary" @onclick="(() => AddTag(tag))">Add</button>
+            </div>
+            <br>
+            @foreach(var item in bag.tags)
+            {
+                <div><button type="reset" class="btn-outline-secondary" @onclick="(() => RemoveTag(item))">X</button> @item 
+                    </div>
+            }
+        </div>
+        <div class="col-12 row mt-2">
             <label for="StartDate" class="col-md-2 col-form-label">StartDate:</label>
             <div>
                 <InputDate id="StartDate" class="form-control" @bind-Value="bag.rental_start_date" />
@@ -59,13 +73,24 @@ else
             </div>
         </div>
         <div class="col-12 row mt-2">
-            <label for="Photo" class="col-md-2 col-form-label">Photo:</label>
-            <div class="col-md-6">
+            <label for="imageUrl" class="col-md-2 col-form-label">Photo:</label>
+            @*<div class="col-md-6">
                 <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />
             </div>
             <div class="col-md-6">
                 <img class="rounded m-1" src="@_imageData" />
+            </div>*@
+            <div>
+                <InputText id="imageUrl" class="form-control" @bind-Value="imageUrl" />
+                <button type="button" class="btn btn-outline-secondary" @onclick="(() => AddImage(imageUrl))">Add</button>
             </div>
+            <br>
+            @foreach (var item in bag.image_urls)
+            {
+                <div>
+                    <button type="reset" class="btn-outline-secondary" @onclick="(() => RemoveImage(item))">X</button> @item
+                </div>
+            }
         </div>
         <div class="row mt-2">
             <div class="col-md-12 text-right">
@@ -77,15 +102,14 @@ else
 }
 <br />
 
-
 @code {
 
     [Parameter]
     public string id { get; set; }
 
     private BagDto bag;
-    private List<string> tags = new();
-    private List<string> imageUrls = new();
+    private string tag = string.Empty;
+    private string imageUrl = string.Empty;
     private string _imageData = string.Empty;
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
@@ -101,6 +125,7 @@ else
         //    await resizedImageFile.OpenReadStream().ReadAsync(buffer);
         //    product.Photo = $"{Convert.ToBase64String(buffer)}";
         //    _imageData = $"data:{format};base64,{product.Photo}";
+
         //}
     }
 
@@ -108,9 +133,14 @@ else
     {
         //brands = new List<BrandInfo>();
         //productTypes = new List<ProductTypeInfo>();
-        bag = new BagDto();
-        tags = new();
-        imageUrls = new();
+        bag = new BagDto() 
+        {  
+            renter_id = "ak@gmail.com",
+            tags = new(),
+            image_urls = new(),
+            rental_start_date = DateTime.Now, 
+            rental_end_date = DateTime.Now
+        };
 
         if (!string.IsNullOrEmpty(id))
         {            
@@ -129,11 +159,39 @@ else
             _response = await _bagService.Update(bag);
 
         if (_response.IsSuccessStatusCode)
-            NavigationManager.NavigateTo("/product/Index");
+            NavigationManager.NavigateTo("/bag/Index");
+        else
+            await jsRuntime.InvokeVoidAsync("alert", "Error has occured!");
+    }
+
+    void AddTag(string tag)
+    {
+        if(!string.IsNullOrEmpty(tag) && !bag.tags.Contains(tag))
+            bag.tags.Add(tag);
+
+        tag = string.Empty;
+    }
+
+    void RemoveTag(string tag)
+    {
+        bag.tags.Remove(tag);
+    }
+
+    void AddImage(string image)
+    {
+        if (!string.IsNullOrEmpty(image) && !bag.image_urls.Contains(image))
+            bag.image_urls.Add(image);
+
+        imageUrl = string.Empty;
+    }
+
+    void RemoveImage(string image)
+    {
+        bag.image_urls.Remove(image);
     }
 
     void Back()
     {
-        NavigationManager.NavigateTo("/product/Index");
+        NavigationManager.NavigateTo("/bag/Index");
     }
 }
