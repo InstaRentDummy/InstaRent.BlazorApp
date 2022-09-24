@@ -7,14 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Shared\Dto\**" />
+    <Content Remove="Shared\Dto\**" />
+    <EmbeddedResource Remove="Shared\Dto\**" />
+    <None Remove="Shared\Dto\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.9" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.9" />
+    <PackageReference Include="Volo.Abp.Ddd.Application.Contracts" Version="5.3.4" />
   </ItemGroup>
 
-  <ItemGroup> 
-	<ProjectReference Include="..\..\..\catalog\src\InstaRent.Catalog.Application.Contracts\InstaRent.Catalog.Application.Contracts.csproj" />
-	 
+  <ItemGroup>
+    <Reference Include="..\InstaRent.Catalog.Application.Contracts">
+      <HintPath>InstaRent.Catalog.Application.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="..\InstaRent.Catalog.Domain.Shared">
+      <HintPath>InstaRent.Catalog.Domain.Shared.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
