@@ -1,4 +1,5 @@
 using InstaRent.BlazorApp;
+using InstaRent.BlazorApp.Services.Bags;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -7,6 +8,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44316") });
+builder.Services.AddScoped<IBagService, BagService>();
 
 builder.Services.AddOidcAuthentication(options =>
 {

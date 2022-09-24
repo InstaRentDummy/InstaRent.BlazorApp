@@ -1,0 +1,170 @@
+﻿@page "/Bag/index"
+@using InstaRent.BlazorApp.Shared.Bags
+@using InstaRent.BlazorApp.Services.Bags
+@using InstaRent.BlazorApp.Shared.Dto
+@using InstaRent.BlazorApp.Components
+@inject IBagService _bagService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h3>My Bag Listing</h3>
+
+
+@if (bags == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="OnAddNew">New Bag</button>
+    </p>
+    <div class="row col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    @*<th>Code <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "code"))" /></th>*@
+                    <th>Name <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "name"))" /></th>
+                    <th>Description <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "description"))" /></th>
+                    <th>Tags <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "tag"))" /></th>
+                    <th>Status <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, "status"))" /></th>
+                    <th>Price</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in bags)
+                {
+                <tr>
+                   @* @if (string.IsNullOrEmpty(info.image_urls))
+                    {
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td><img class="rounded m-0 h-auto w-auto" src="@string.Format($"data:png;base64,{info.Photo}")" /></td>
+                    }*@
+                    <td></td>
+                    <td>@info.bag_name</td>
+                    <td>@info.description</td>
+                    <td></td>
+                    <td>@info.status</td>
+                    <td>@info.price</td>
+                    <td>@info.rental_start_date.Date.ToString("yyyyy-MM-dd")</td>
+                    <td>@info.rental_start_date.Date.ToString("yyyyy-MM-dd")</td>
+                    <td>
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
+                        <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnDelete(info))">Delete</a>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+}
+
+@code {
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 10};
+    private List<BagDto> bags;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+    string _name, _description, _tag, _status;
+
+    void OnAddNew()
+    {
+        NavigationManager.NavigateTo("/Bag/Add");
+    }
+
+    void OnEdit(Guid id)
+    {
+        NavigationManager.NavigateTo($"/Bag/Edit/{id.ToString()}");
+    }
+
+    async void OnDelete(BagDto info)
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Bag '{info.bag_name}'?"))
+            return;
+
+        Show = false;
+        var result = await _bagService.Delete(info.Id.ToString());
+
+        if (result.IsSuccessStatusCode)
+            await LoadForm();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
+    private async Task LoadForm()
+    {
+        await Task.Delay(500);
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
+    async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
+    {
+        switch (columnTitle)
+        {
+            case "name":
+                _name = changeEventArgs.Value.ToString();
+                break;
+            case "description":
+                _description = changeEventArgs.Value.ToString();
+                break;
+            case "status":
+                _status = changeEventArgs.Value.ToString();
+                break;
+        }
+
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    products = await Http.GetFromJsonAsync<List<ProductInfo>>("api/product/get");
+    //}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
+        _description = string.IsNullOrEmpty(_description) ? string.Empty : _description;
+        _status = string.IsNullOrEmpty(_status) ? string.Empty : _status;
+
+        await _bagService.GetListByUserId(parameters.PageNumber, "", _name, _description, _tag, _status);
+               
+        bags = _bagService.Bags.Items;
+        MetaData = _bagService.Bags.Meta;
+    }
+
+}
