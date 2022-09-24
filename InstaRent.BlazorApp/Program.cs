@@ -7,11 +7,11 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44316") });
-builder.Services.AddScoped<IBagService, BagService>();
+
 var baseURL= builder.Configuration.GetValue<string>("App:BaseUrl");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseURL) });
+builder.Services.AddScoped<IBagService, BagService>();
 
 builder.Services.AddOidcAuthentication(options =>
 {
