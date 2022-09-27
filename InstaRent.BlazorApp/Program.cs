@@ -1,5 +1,6 @@
 using InstaRent.BlazorApp;
 using InstaRent.BlazorApp.Services.Bags;
+using InstaRent.BlazorApp.Services.Catalog;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -12,6 +13,8 @@ var baseURL= builder.Configuration.GetValue<string>("App:BaseUrl");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseURL) });
 builder.Services.AddScoped<IBagService, BagService>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+
 
 builder.Services.AddOidcAuthentication(options =>
 {
