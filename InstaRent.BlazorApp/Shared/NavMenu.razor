@@ -1,4 +1,9 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Blazored.LocalStorage
+@using InstaRent.Login.Users
+@inject ILocalStorageService localStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">InstaRent.BlazorApp</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -14,7 +19,7 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        @*<div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
@@ -23,27 +28,57 @@
             <NavLink class="nav-link" href="fetchdata">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
-        </div>
+        </div>*@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="catalog">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Catalog List
             </NavLink>
         </div>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="bag/index">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Bag
-            </NavLink>
-        </li>
+         <AuthorizeView>
+             <Authorized>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="bag/index">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Bag
+                </NavLink>
+            </div>
+            </Authorized>
+        </AuthorizeView>
+        <div class="dropdown-divider"/>
+        <div class="nav-item px-3">            
+            <AuthorizeView>
+                <NotAuthorized>
+                    <NavLink class="nav-link" href="login">
+                        <span class="oi oi-account-login" aria-hidden="true"></span> Login
+                    </NavLink>
+                </NotAuthorized>
+                <Authorized>
+                    <a class="nav-link" @onclick="Logout" style="cursor: pointer">
+                        <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+                    </a>
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
+    UserDto localUser = new UserDto();
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        localUser = await localStorage.GetItemAsync<UserDto>("user");
+    }
+
+    private async void Logout()
+    {
+        await localStorage.RemoveItemAsync("user");
+        await AuthStateProvider.GetAuthenticationStateAsync();
     }
 }

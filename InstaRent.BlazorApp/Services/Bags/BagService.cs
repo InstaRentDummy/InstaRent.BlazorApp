@@ -25,7 +25,7 @@ namespace InstaRent.BlazorApp.Services.Bags
             string _userId = string.IsNullOrEmpty(userId) ? string.Empty : userId;
             int _skipcount = _pageParameters.PageSize * (currentPage - 1);
 
-            var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>($"{_url}?renter_id={_userId}&bag_name={name}&description={description}&tags={tags}&status={status}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}");
+            var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>($"{_url}?renter_id={_userId}&bag_name={name}&description={description}&tags={tags}&status={status}&isdeleted=false&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}");
 
             Bags.Items = response.Items.ToList();
             Bags.Meta = new MetaData()
@@ -47,7 +47,7 @@ namespace InstaRent.BlazorApp.Services.Bags
 
         public async Task<HttpResponseMessage> Create(BagDto bag)
         {
-            return await _http.PostAsJsonAsync<BagCreateDto>(_url, new BagCreateDto()
+            var dto = new BagCreateDto()
             {
                 bag_name = bag.bag_name,
                 description = bag.description,
@@ -58,7 +58,8 @@ namespace InstaRent.BlazorApp.Services.Bags
                 rental_start_date = bag.rental_start_date,
                 rental_end_date = bag.rental_end_date,
                 status = "available"
-            });
+            };
+            return await _http.PostAsJsonAsync<BagCreateDto>(_url, dto, CancellationToken.None);
             //NavigationManager.NavigateTo("/product/Index");
         }
 

@@ -1,70 +1,43 @@
 ﻿@page "/Bag/Add"
 @page "/Bag/Edit/{id}"
-@using InstaRent.BlazorApp.Shared.Bags
-@using InstaRent.BlazorApp.Services.Bags
+@using InstaRent.Login.Users
+@using InstaRent.BlazorApp.Services.Users
 @using InstaRent.BlazorApp.Shared.Dto
 @using InstaRent.BlazorApp.Components
-@inject IBagService _bagService
+@inject IUserService _userService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 
-<h3>Bag Entry</h3>
+<h3>User Profile</h3>
 
-@if (bag == null)
+@if (user == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <EditForm Model="bag" OnValidSubmit="Create" class="card card-body bg-light mt-2">
+    <EditForm Model="user" OnValidSubmit="Create" class="card card-body bg-light mt-2">
         <DataAnnotationsValidator />
 
-        @*<div class="col-12 row mt-2">
-    <label for="Code" class="col-md-2 col-form-label">Code:</label>
-    <div>
-    <InputText id="Code" class="form-control" @bind-Value="product.Code" />
-    <ValidationMessage For="@(()=> product.Code)" />
-    </div>
-    </div>*@
         <div class="col-12 row mt-2">
             <label for="Name" class="col-md-2 col-form-label">Name:</label>
             <div>
-                <InputText id="Name" class="form-control" @bind-Value="bag.bag_name" />
-                <ValidationMessage For="@(()=> bag.bag_name)" />
+                <InputText id="Name" class="form-control" @bind-Value="user.Name" />
+                <ValidationMessage For="@(()=> user.Name)" />
             </div>
         </div>
         <div class="col-12 row mt-2">
-            <label for="Description" class="col-md-2 col-form-label">Description:</label>
+            <label for="Email" class="col-md-2 col-form-label">Description:</label>
             <div>
-                <InputTextArea id="Description" class="form-control" @bind-Value="bag.description" />
-                <ValidationMessage For="@(()=> bag.description)" />
+                <InputTextArea id="Email" class="form-control" @bind-Value="user.Email" />
+                <ValidationMessage For="@(()=> user.Email)" />
             </div>
         </div>
         <div class="col-12 row mt-2">
-            <label for="Price" class="col-md-2 col-form-label">Price:</label>
+            <label for="Password" class="col-md-2 col-form-label">Price:</label>
             <div>
-                <InputNumber id="Price" class="form-control" @bind-Value="bag.price" />
-                <ValidationMessage For="@(()=> bag.price)" />
-            </div>
-        </div>
-        <div class="col-12 row mt-2">
-            <label for="StartDate" class="col-md-2 col-form-label">StartDate:</label>
-            <div>
-                <InputDate id="StartDate" class="form-control" @bind-Value="bag.rental_start_date" />
-            </div>
-        </div>
-        <div class="col-12 row mt-2">
-            <label for="EndDate" class="col-md-2 col-form-label">EndDate:</label>
-            <div>
-                <InputDate id="EndDate" class="form-control" @bind-Value="bag.rental_end_date" />
-            </div>
-        </div>
-        <div class="col-12 row mt-2">
-            <label for="Photo" class="col-md-2 col-form-label">Photo:</label>
-            <div class="col-md-6">
-                <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />
-            </div>
-            <div class="col-md-6">
-                <img class="rounded m-1" src="@_imageData" />
+                <InputNumber id="Password" class="form-control" @bind-Value="user.Password" />
+                <ValidationMessage For="@(()=> user.Password)" />
             </div>
         </div>
         <div class="row mt-2">
@@ -77,45 +50,18 @@ else
 }
 <br />
 
-
 @code {
 
     [Parameter]
     public string id { get; set; }
 
-    private BagDto bag;
-    private List<string> tags = new();
-    private List<string> imageUrls = new();
-    private string _imageData = string.Empty;
-
-    private async Task OnInputFileChange(InputFileChangeEventArgs e)
-    {
-        var maxAllowedFiles = 3;
-        var format = "image/png";
-
-        //foreach (var imageFile in e.GetMultipleFiles(maxAllowedFiles))
-        //{
-        //    var resizedImageFile = await imageFile.RequestImageFileAsync(format,
-        //        100, 100);
-        //    var buffer = new byte[resizedImageFile.Size];
-        //    await resizedImageFile.OpenReadStream().ReadAsync(buffer);
-        //    product.Photo = $"{Convert.ToBase64String(buffer)}";
-        //    _imageData = $"data:{format};base64,{product.Photo}";
-        //}
-    }
+    private UserDto user = new();
 
     protected override async Task OnInitializedAsync()
     {
-        //brands = new List<BrandInfo>();
-        //productTypes = new List<ProductTypeInfo>();
-        bag = new BagDto();
-        tags = new();
-        imageUrls = new();
-
         if (!string.IsNullOrEmpty(id))
-        {            
-            bag = await _bagService.GetInfoById(id);
-            //_imageData = string.IsNullOrEmpty(product.Photo) ? string.Empty : $"data:png;base64,{product.Photo}";
+        {
+            user = await _userService.GetInfoById(id);
         }
     }
 
@@ -124,16 +70,18 @@ else
         HttpResponseMessage _response;
 
         if (string.IsNullOrEmpty(id))
-            _response = await _bagService.Create(bag);
+            _response = await _userService.Create(user);
         else
-            _response = await _bagService.Update(bag);
+            _response = await _userService.Update(user);
 
         if (_response.IsSuccessStatusCode)
-            NavigationManager.NavigateTo("/product/Index");
+            NavigationManager.NavigateTo("/bag/Index");
+        else
+            await jsRuntime.InvokeVoidAsync("alert", "Error has occured!");
     }
 
     void Back()
     {
-        NavigationManager.NavigateTo("/product/Index");
+        NavigationManager.NavigateTo("../Index");
     }
 }
