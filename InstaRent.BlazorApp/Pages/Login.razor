@@ -1,0 +1,44 @@
+﻿@page "/login"
+@using Blazored.LocalStorage
+@using InstaRent.Login.Users
+@using InstaRent.BlazorApp.Services.Users
+@inject ILocalStorageService LocalStorage
+@inject IUserService _userService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Login</h3>
+
+<EditForm Model="user" OnSubmit="HandleLogin">
+    <div class="form-check">
+        <label for="username">Username</label>
+        <InputText id="username" @bind-Value="user.Email" class="form-control" />
+    </div>
+    <div class="form-check">
+        <label for="password">Password</label>
+        <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" />
+    </div>
+    <div class="form-check">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>    
+</EditForm>
+
+@code {
+    LoginUserDto user = new();
+
+    private async void HandleLogin()
+    { 
+        var result = await _userService.Login(user);
+
+        if (result != null)
+        {
+            await LocalStorage.SetItemAsync<UserDto>("user", result);
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            NavigationManager.NavigateTo("");
+        }
+        else
+        { 
+        
+        }
+    }
+}
