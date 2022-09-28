@@ -1,11 +1,14 @@
 ﻿@page "/Bag/{id}"
+@using Blazored.LocalStorage
+@using InstaRent.BlazorApp.Shared.Users
+@inject ILocalStorageService localStorage
 @using InstaRent.BlazorApp.Shared.Bags
 @using InstaRent.BlazorApp.Services.Catalog
 @using InstaRent.BlazorApp.Components
 @inject ICatalogService catalogService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
+@using BlazorDateRangePicker
 @if (bag == null)
 {
     <p><em>Loading...</em></p>
@@ -19,44 +22,60 @@ else
             <span class="visually-hidden">unread messages</span>
         </span>
     </button>
-    <div class="container col-10">
-        <div class="row">
-            <div class="col-6">
-                <div id="carouselBag" class="carousel slide" data-bs-ride="carousel" data-bs-wrap="true" data-bs-pause="false" data-interval="false">
-                    <div class="carousel-inner">
-                        @{
-                            Boolean first = true;
-                        }
-                        @foreach (var img in bag.image_urls)
-                        {
-                            <div class="carousel-item @( first ? "active" : "" )">
-                                <img src="@img" class="d-block w-100" alt="...">
-                            </div>
-                        }
+    <div class="container row">
+        <div id="carouselBag" class="carousel slide col-6  d-flex m-2" data-bs-ride="carousel" data-bs-wrap="true" data-bs-pause="false" data-interval="false" style="min-width: 20rem;" >
+            <div class="carousel-inner ">
+                @{
+                    Boolean first = true;
+                }
+                @foreach (var img in bag.image_urls)
+                {
+                    <div class="carousel-item @( first ? "active" : "" )">
+                        <img src="@img" class="d-block w-100" alt="...">
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBag" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselBag" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
-                <div class="col-4">
-                    <div class="card d-flex" style="min-width: 18rem;">
-                        <div class="card-body">
-                            <h5 class="card-title ">@bag.bag_name</h5>
-                            <p class="card-text"> @bag.description</p>
-                            <h5 class="badge bg-primary rounded-pill p-2">
-                                $@bag.price
-                            </h5>
+                }
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselBag" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselBag" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <div class="card col-3 d-flex" style="min-width: 20rem;">
+
+            <div class="card-body">
+                <h5 class="card-title ">@bag.bag_name</h5>
+                <p class="card-text"> @bag.description</p>
+                <h5 class="badge bg-success rounded-pill p-3">
+                    $@bag.price
+                </h5>
+
+                <div class="card border-dark mb-3">
+                 
+                    <div class="card-body">
+                        <h6>Rent Period: </h6> <DateRangePicker  MinDate="DateTimeOffset.Now" MaxDate="@bag.rental_end_date" OnRangeSelect="OnRangeSelect" />
+                        <p class="card-text">No of Days : @totalDays</p>
+                    </div>
+                    <div class="card-footer text-white bg-dark">
+                        Total: <span class="card-text">S$ @totalAmt.ToString("N02")</span>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-light align-self-end" onclick="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>Add to Cart</small> </button>
                         </div>
                     </div>
                 </div>
+                
+               
+
+               
             </div>
         </div>
     </div>
+
+
+
 }
 
 @code {
@@ -66,7 +85,9 @@ else
     public string id { get; set; }
     private int currentIndex = 0;
     private BagDto bag;
-
+    private int totalDays;
+    private double totalAmt;
+    private DateRange _dateRange;
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(id))
@@ -81,8 +102,25 @@ else
         StateHasChanged();
     }
 
+    public void OnRangeSelect(DateRange range)
+    {
+        totalDays = (int)(range.End - range.Start).TotalDays;
+        totalAmt = bag.price * totalDays;
+        _dateRange = range;
+    }
+    UserInfoDto localUser = new();
 
+    async Task AddtoCart()
+    {
+         if(_dateRange!=null)
+         {
+            localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+            if(localUser ==null)
+            {
+                NavigationManager.NavigateTo($"/login");
+            }
 
-
-
+         }
+    }
+    
 }

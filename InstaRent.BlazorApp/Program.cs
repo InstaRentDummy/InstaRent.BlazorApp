@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using InstaRent.BlazorApp.Services.Catalog;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using BlazorDateRangePicker;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -21,6 +22,13 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddDateRangePicker(config =>
+{
+    config.Attributes = new Dictionary<string, object>
+                {
+                    { "class", "form-control form-control-sm" }
+                };
+});
 
 
 //builder.Services.AddOidcAuthentication(options =>

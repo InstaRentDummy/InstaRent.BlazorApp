@@ -9,7 +9,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
 {
     public interface ICatalogService
     {
-        public BagListDto Bags { get; set; } 
+        public CatalogListDto Bags { get; set; } 
         Task LoadCatalogs(string categoryType = null, string userId = "", string filterText="");
         Task IncreaseViewCount(string bag_id);
         Task<BagDto?> GetbyId(string id);

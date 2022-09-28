@@ -15,7 +15,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
         private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
         public event Action OnChange;
 
-        public BagListDto Bags { get; set; }
+        public CatalogListDto Bags { get; set; }
 
         public CatalogService(HttpClient http)
         {
@@ -79,7 +79,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
                             List<BagDto> _bags = new List<BagDto>();
                             var bag = response.Items.ToList();
                             bag.ForEach(x => _bags.Add(x.Bag));
-                            Bags = new BagListDto();
+                            Bags = new CatalogListDto();
                             Bags.Items = _bags;
                             _ttlcount = (int)response.TotalCount;
                         }
