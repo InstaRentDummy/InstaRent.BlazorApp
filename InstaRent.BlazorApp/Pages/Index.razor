@@ -1,25 +1,5 @@
 ﻿@page "/"
-@using Blazored.LocalStorage
 @using InstaRent.BlazorApp.Pages.Catalog
-@using InstaRent.Login.Users
-@inject ILocalStorageService localStorage
 
-    <AuthorizeView>
-        <NotAuthorized>
-            <h1>Welcome to InstaRent!</h1>
-        </NotAuthorized>
-        <Authorized>
-            <h1>Welcome back @user.Name!</h1>
-        </Authorized>
-    </AuthorizeView>
     <CatalogList />
     
-@code
-{
-    UserDto user = new();
-
-    protected override async Task OnParametersSetAsync()
-    {
-        user = await localStorage.GetItemAsync<UserDto>("user");
-    }
-}
