@@ -9,9 +9,16 @@ namespace InstaRent.BlazorApp.Services.Users
         private readonly HttpClient _http;
         string _url = "api/user";
 
+
+        public event Action OnChange;
         public UserService(HttpClient http)
         {
             _http = http;
+        }
+
+        public void StateChange()
+        {
+            OnChange.Invoke();
         }
 
         public async Task<UserInfoDto?> Login(UserLoginInfoDto user)

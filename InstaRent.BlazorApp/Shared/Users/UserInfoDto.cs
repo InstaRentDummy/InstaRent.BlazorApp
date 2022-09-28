@@ -28,5 +28,7 @@ namespace InstaRent.BlazorApp.Shared.Users
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }
