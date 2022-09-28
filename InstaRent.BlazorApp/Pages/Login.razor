@@ -11,37 +11,60 @@
 
 <EditForm Model="loginInfo" OnValidSubmit="HandleLogin">
     <DataAnnotationsValidator />
+        
     <div class="form-check">
-        <label for="username">Username</label>
+        <label for="username">Email</label>
         <InputText id="username" @bind-Value="loginInfo.Email" class="form-control" />
         <ValidationMessage For="@(() => loginInfo.Email)" />
     </div>
+
     <div class="form-check">
         <label for="password">Password</label>
         <InputText id="password" @bind-Value="loginInfo.Password" type="password" class="form-control" />
         <ValidationMessage For="@(() => loginInfo.Password)" />
     </div>
+
     <div class="form-check">
-        <button type="submit" class="btn btn-primary">Login</button>
-    </div>    
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </div>
+
+    <div class="form-check">
+        <label class="text-danger">@loginInfo.ErrorMessage</label>
+    </div>
+
+    <NavLink href="/User/Add">
+        <h6 class="font-weight-normal text-end">Create account</h6>
+    </NavLink>
 </EditForm>
 
 @code {
     UserInfoDto user = new();
     UserLoginInfoDto loginInfo = new();
-    private async void HandleLogin()
-    { 
-        var result = await _userService.Login(loginInfo);
 
-        if (result != null)
+    private async void HandleLogin()
+    {
+        try
         {
-            await LocalStorage.SetItemAsync<UserInfoDto>("user", result);
-            await AuthStateProvider.GetAuthenticationStateAsync();
-            NavigationManager.NavigateTo("");
-        }
-        else
-        { 
+            loginInfo.ErrorMessage = " ";
+            var result = await _userService.Login(loginInfo);
         
+            if (result != null)
+            {
+                await LocalStorage.SetItemAsync<UserInfoDto>("user", result);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                _userService.StateChange();
+                NavigationManager.NavigateTo("");
+            }
+            else
+            {
+                loginInfo.ErrorMessage ="Invalid Email or Password";
+                StateHasChanged();
+            }
+        }
+        catch(Exception ex)
+        {
+            loginInfo.ErrorMessage = ex.Message;
+            StateHasChanged();
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿@using InstaRent.BlazorApp.Shared.Users
 @using Blazored.LocalStorage
+@using InstaRent.BlazorApp.Services.Users
+@inject IUserService _userService
 @inject ILocalStorageService localStorage
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
@@ -14,14 +16,12 @@
         <div class="top-row px-4 auth">
             <AuthorizeView>
                 <NotAuthorized>
-                    <a href="User/Add">Register</a>
                     <a href="login">Login</a>
                 </NotAuthorized>
                 <Authorized>
                     Welcome back!
-                    <a @onclick="UserProfile">@localUser.Name</a>
-                    <a @onclick="Logout">Logout</a>
-                    
+                    <a @onclick="UserProfile">@localUser.Name</a>                                        
+                    <a @onclick="Logout">Logout</a>                    
                 </Authorized>
             </AuthorizeView>
         </div>
@@ -34,15 +34,22 @@
 
 @code{
     UserInfoDto localUser = new();
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
-    //}
+    protected override async Task OnInitializedAsync()
+    {
+        localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+       _userService.OnChange += MenuChanged;
+    }
 
-    //protected override async void OnParametersSet()
-    //{
-    //    localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
-    //}
+    void Dispose()
+    {
+        _userService.OnChange -= MenuChanged;
+    }
+
+    private async void MenuChanged()
+    {
+        localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+        await InvokeAsync(StateHasChanged);
+    }
 
     private async void Logout()
     {

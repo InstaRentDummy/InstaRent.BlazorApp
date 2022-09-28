@@ -1,5 +1,7 @@
 ﻿@using Blazored.LocalStorage
 @using InstaRent.BlazorApp.Shared.Users
+@using InstaRent.BlazorApp.Services.Users
+@inject IUserService _userService
 @inject ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
@@ -50,15 +52,6 @@
             </Authorized>
         </AuthorizeView>
         <div class="dropdown-divider"/>
-        <div class="nav-item px-3">            
-            <AuthorizeView>
-                <Authorized>
-                    <a class="nav-link" @onclick="Profile" style="cursor: pointer">
-                        <span class="oi oi-account-logout" aria-hidden="true"></span> Profile
-                    </a>
-                </Authorized>
-            </AuthorizeView>
-        </div>
     </nav>
 </div>
 
@@ -73,6 +66,24 @@
     }
 
     UserInfoDto localUser = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+        _userService.OnChange += MenuChanged;
+    }
+
+    void Dispose()
+    {
+        _userService.OnChange -= MenuChanged;
+    }
+
+    private async void MenuChanged()
+    {
+        localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+        await InvokeAsync(StateHasChanged);
+    }
+
 
     private async void Logout()
     {
