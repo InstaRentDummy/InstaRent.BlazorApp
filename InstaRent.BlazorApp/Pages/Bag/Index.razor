@@ -1,10 +1,13 @@
 ﻿@page "/Bag/index"
+@using Blazored.LocalStorage
+@using InstaRent.BlazorApp.Shared.Users
 @using InstaRent.BlazorApp.Shared.Bags
 @using InstaRent.BlazorApp.Services.Bags
 @using InstaRent.BlazorApp.Shared.Dto
 @using InstaRent.BlazorApp.Components
 @inject IBagService _bagService
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService localStorage
 @inject IJSRuntime JSRuntime
 
 <h3>My Bag Listing</h3>
@@ -46,36 +49,36 @@ else
                 @foreach (var info in bags)
                 {
                 <tr>
-                    <th colspan="4"><h4>@info.bag_name</h4></th> 
+                    <th colspan="4"><h4>@info.BagName</h4></th> 
                 </tr>
                 <tr>
                     <td>
-                        @foreach(var img in info.image_urls)
+                        @foreach(var img in info.ImageUrls)
                         {
-                            <img class="m-auto" src="@img" width="50" height="50" alt="@info.bag_name" />
+                            <img class="m-auto" src="@img" width="50" height="50" alt="@info.BagName" />
                         }
                         <br>
                         <ul>
-                            @foreach (var tag in info.tags)
+                            @foreach (var tag in info.Tags)
                             {
                                 <li>@tag</li>
                             }
                         </ul>
                     </td>
                     <td>
-                        @info.description
+                        @info.Description
                             <br>
                             <div class="m-auto">
-                                Start Date: @info.rental_start_date.Date.ToString("yyyyy-MM-dd") |
-                                End Date: @info.rental_start_date.Date.ToString("yyyyy-MM-dd")
+                                Start Date: @info.RentalStartDate.Date.ToString("yyyyy-MM-dd") |
+                                End Date: @info.RentalEndDate.Date.ToString("yyyyy-MM-dd")
                             </div>
                     </td>
                     <td colspan="2">
                         <div class="m-auto">
-                                @info.status
+                                @info.Status
                                 <br>
                                 <h5 class="modal-sm">
-                                    @info.price SGD
+                                    @info.Price SGD
                                 </h5>      
                                 <br>                                
                                 <a style="text-underline-position:below; cursor:pointer; color:blue" @onclick="(() => OnEdit(info.Id))">Edit</a> |
@@ -102,8 +105,8 @@ else
     string StatusVal = "Status";
 
     public MetaData MetaData { get; set; } = new MetaData();
-    private PageParameters _pageParameters = new PageParameters() { PageSize = 10};
-    private List<BagDto> bags;
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 5};
+    private List<BagInfoDto> bags;
     public bool Show { get; set; } = false;
     int _tempId = 0;
     string _name, _description, _tag, _status;
@@ -125,14 +128,14 @@ else
         NavigationManager.NavigateTo("/Bag/Add");
     }
 
-    void OnEdit(Guid id)
+    void OnEdit(string id)
     {
         NavigationManager.NavigateTo($"/Bag/Edit/{id.ToString()}");
     }
 
-    async void OnDelete(BagDto info)
+    async void OnDelete(BagInfoDto info)
     {
-        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Bag '{info.bag_name}'?"))
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure to delete the Bag '{info.BagName}'?"))
             return;
 
         Show = false;
@@ -201,12 +204,13 @@ else
 
     async Task GetData(PageParameters parameters)
     {
+        var user = await localStorage.GetItemAsync<UserInfoDto>("user");
         _name = string.IsNullOrEmpty(_name) ? string.Empty : _name;
         _description = string.IsNullOrEmpty(_description) ? string.Empty : _description;
         _tag = string.IsNullOrEmpty(_tag) ? string.Empty : _tag;
         _status = string.IsNullOrEmpty(_status) ? string.Empty : _status;
 
-        await _bagService.GetListByUserId(parameters.PageNumber, "", _name, _description, _tag, _status);
+        await _bagService.GetListByUserId(parameters.PageNumber, user.Email, _name, _description, _tag, _status);
                
         bags = _bagService.Bags.Items;
         MetaData = _bagService.Bags.Meta;

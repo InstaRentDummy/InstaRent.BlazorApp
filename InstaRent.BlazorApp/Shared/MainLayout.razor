@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using InstaRent.BlazorApp.Shared.Users
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -7,8 +12,18 @@
 
     <main>
         <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <a href="User/Add">Register</a>
+                    <a href="login">Login</a>
+                </NotAuthorized>
+                <Authorized>
+                    Welcome back!
+                    <a @onclick="UserProfile">@localUser.Name</a>
+                    <a @onclick="Logout">Logout</a>
+                    
+                </Authorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -16,3 +31,28 @@
         </article>
     </main>
 </div>
+
+@code{
+    UserInfoDto localUser = new();
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+    //}
+
+    //protected override async void OnParametersSet()
+    //{
+    //    localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+    //}
+
+    private async void Logout()
+    {
+        await localStorage.RemoveItemAsync("user");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        NavigationManager.NavigateTo($"");
+    }
+
+    private void UserProfile()
+    {
+        NavigationManager.NavigateTo($"/User/Edit/{localUser.Id}");
+    }
+}

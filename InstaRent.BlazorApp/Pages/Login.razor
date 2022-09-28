@@ -1,6 +1,6 @@
 ﻿@page "/login"
 @using Blazored.LocalStorage
-@using InstaRent.Login.Users
+@using InstaRent.BlazorApp.Shared.Users
 @using InstaRent.BlazorApp.Services.Users
 @inject ILocalStorageService LocalStorage
 @inject IUserService _userService
@@ -9,14 +9,17 @@
 
 <h3>Login</h3>
 
-<EditForm Model="user" OnSubmit="HandleLogin">
+<EditForm Model="loginInfo" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
     <div class="form-check">
         <label for="username">Username</label>
-        <InputText id="username" @bind-Value="user.Email" class="form-control" />
+        <InputText id="username" @bind-Value="loginInfo.Email" class="form-control" />
+        <ValidationMessage For="@(() => loginInfo.Email)" />
     </div>
     <div class="form-check">
         <label for="password">Password</label>
-        <InputText id="password" @bind-Value="user.Password" type="password" class="form-control" />
+        <InputText id="password" @bind-Value="loginInfo.Password" type="password" class="form-control" />
+        <ValidationMessage For="@(() => loginInfo.Password)" />
     </div>
     <div class="form-check">
         <button type="submit" class="btn btn-primary">Login</button>
@@ -24,15 +27,15 @@
 </EditForm>
 
 @code {
-    LoginUserDto user = new();
-
+    UserInfoDto user = new();
+    UserLoginInfoDto loginInfo = new();
     private async void HandleLogin()
     { 
-        var result = await _userService.Login(user);
+        var result = await _userService.Login(loginInfo);
 
         if (result != null)
         {
-            await LocalStorage.SetItemAsync<UserDto>("user", result);
+            await LocalStorage.SetItemAsync<UserInfoDto>("user", result);
             await AuthStateProvider.GetAuthenticationStateAsync();
             NavigationManager.NavigateTo("");
         }
