@@ -1,4 +1,5 @@
 ﻿using InstaRent.BlazorApp.Shared.Bags;
+using InstaRent.Catalog.Bags;
 using InstaRent.Catalog.DailyClicks;
 using InstaRent.Catalog.TotalClicks;
 using InstaRent.Catalog.UserPreferences;
@@ -11,5 +12,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
         public BagListDto Bags { get; set; } 
         Task LoadCatalogs(string categoryType = null, string userId = "", string filterText="");
         Task IncreaseViewCount(string bag_id);
+        Task<BagDto?> GetbyId(string id);
     }
 }

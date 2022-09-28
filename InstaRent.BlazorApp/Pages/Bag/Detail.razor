@@ -1,0 +1,88 @@
+﻿@page "/Bag/{id}"
+@using InstaRent.BlazorApp.Shared.Bags
+@using InstaRent.BlazorApp.Services.Catalog
+@using InstaRent.BlazorApp.Components
+@inject ICatalogService catalogService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@if (bag == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button type="button" class="btn btn-primary position-relative">
+        Cart
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            1
+            <span class="visually-hidden">unread messages</span>
+        </span>
+    </button>
+    <div class="container col-10">
+        <div class="row">
+            <div class="col-6">
+                <div id="carouselBag" class="carousel slide" data-bs-ride="carousel" data-bs-wrap="true" data-bs-pause="false" data-interval="false">
+                    <div class="carousel-inner">
+                        @{
+                            Boolean first = true;
+                        }
+                        @foreach (var img in bag.image_urls)
+                        {
+                            <div class="carousel-item @( first ? "active" : "" )">
+                                <img src="@img" class="d-block w-100" alt="...">
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBag" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselBag" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                <div class="col-4">
+                    <div class="card d-flex" style="min-width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title ">@bag.bag_name</h5>
+                            <p class="card-text"> @bag.description</p>
+                            <h5 class="badge bg-primary rounded-pill p-2">
+                                $@bag.price
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string selectedSlide = "2";
+
+    [Parameter]
+    public string id { get; set; }
+    private int currentIndex = 0;
+    private BagDto bag;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            var b = await catalogService.GetbyId(id);
+            if (b != null)
+                bag = b;
+
+        }
+
+        await base.OnInitializedAsync();
+        StateHasChanged();
+    }
+
+
+
+
+
+}

@@ -5,12 +5,13 @@
 @using InstaRent.BlazorApp.Shared.Dto
 @inject ICatalogService catalogService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @*<h3>Catalog List</h3>*@
 
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        
+
         <div class="dropdown  nav-item">
 
             <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -30,16 +31,13 @@
             </ul>
         </div>
         <form class="d-flex w-100">
-            <input class="form-control me-2 " type="search" placeholder="Search" aria-label="Search" @bind-value="_searchValue" @bind-value:event="oninput" @onkeydown="@(e => OnSearchTextChanged(e))">
+
+            <input class="form-control" placeholder="search" @bind="_searchValue" @bind:event="oninput" @onkeypress="@KeyHandler" @onkeypress:preventDefault="shouldPrevent" />
+
         </form>
     </div>
 </nav>
-
-
-
-
-
-
+ 
 <div class="container mt-3">
 
     @if (catalogService.Bags != null)
@@ -50,24 +48,28 @@
             {
                 <div class="col-sm">
                     <div class="card h-100" style="min-width: 18rem; max-width: 18rem;">
-                        <img src="@bag.image_urls[0]" class="img-fluid" alt="...">
+                        <img src="@bag.image_urls[0]" class="card-img-top" alt="...">
                         <div class="card-body">
                             <a role="button" @onclick=@( () => ViewDetail(@bag.Id.ToString()) ) class="stretched-link">
-                                <h5 class="card-title">@bag.bag_name</h5>
+                                <h5 class="card-title ">@bag.bag_name</h5>
                             </a>
-                            <p class="card-text"> @bag.description</p>
-                            <h5 class="badge bg-primary rounded-pill">
-                                $@bag.price
-                            </h5>
+                            <p class="card-text crop-text-2"> @bag.description</p>
+                            <div class="d-flex  justify-content-end bd-highlight align-middle">
+                                <cite class="text-success me-2">@bag.status</cite>
+                                <h5 class="badge bg-primary rounded-pill">
+                                    $@bag.price
+                                </h5>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             }
         </div>
 
-        <div>
+        <div class="m-5">
             <div>
-                <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+                <InstaRent.BlazorApp.Components.Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
             </div>
         </div>
     }
@@ -78,7 +80,8 @@
 </div>
 
 @code {
-    string _filterText;
+
+    public string _searchValue { get; set; }
     public MetaData MetaData { get; set; } = new MetaData();
     private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
     public string ActivePage { get; set; }
@@ -86,16 +89,24 @@
 
 
 
-    void ActivatePage(string page)
+    async Task ActivatePage(string page)
     {
         ActivePage = page;
-        LoadList();
+        await LoadList();
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        ActivatePage("Trending");
-        await LoadList();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    { 
+
+        if (firstRender)
+        {
+            await ActivatePage("Trending");
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task ViewDetail(string bagid)
@@ -109,21 +120,28 @@
         await LoadList();
     }
 
-    public string _searchValue { get; set; }
-    async void OnSearchTextChanged(KeyboardEventArgs e)
+    bool shouldPrevent;
+    async void KeyHandler(KeyboardEventArgs e)
     {
         if (e.Code == "Enter" || e.Code == "NumpadEnter")
         {
-            _filterText = _searchValue.ToString();
+            shouldPrevent = true;
+
             await LoadList();
+
+            StateHasChanged();
         }
+
+        shouldPrevent = false;
     }
+
+    
 
     async Task LoadList()
     {
 
-        await catalogService.LoadCatalogs(categoryType: ActivePage, filterText: _filterText);
-        StateHasChanged();
+        await catalogService.LoadCatalogs(categoryType: ActivePage, filterText: _searchValue);
+        
     }
 
 }
