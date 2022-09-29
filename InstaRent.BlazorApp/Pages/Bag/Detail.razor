@@ -15,13 +15,7 @@
 }
 else
 {
-    <button type="button" class="btn btn-primary position-relative">
-        Cart
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            1
-            <span class="visually-hidden">unread messages</span>
-        </span>
-    </button>
+    
     <div class="container row">
         <div id="carouselBag" class="carousel slide col-6  d-flex m-2" data-bs-ride="carousel" data-bs-wrap="true" data-bs-pause="false" data-interval="false" style="min-width: 20rem;" >
             <div class="carousel-inner ">
@@ -62,8 +56,11 @@ else
                     <div class="card-footer text-white bg-dark">
                         Total: <span class="card-text">S$ @totalAmt.ToString("N02")</span>
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-light align-self-end" onclick="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>Add to Cart</small> </button>
+                            <button class="btn btn-light align-self-end" disabled=@isAddedToCart onclick ="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>@cartBtnName</small> </button>
                         </div>
+                    </div>
+                    <div class="d-flex p-2">
+                        <a href="" class="link-dark">Go to Shopping Cart<i class="bi bi-arrow-right-square-fill ms-2"></i></a>
                     </div>
                 </div>
                 
@@ -84,18 +81,33 @@ else
     [Parameter]
     public string id { get; set; }
     private int currentIndex = 0;
+    private int? cartcount;
     private BagDto bag;
     private int totalDays;
     private double totalAmt;
+    private bool isAddedToCart;
     private DateRange _dateRange;
+    private string cartBtnName;
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(id))
         {
             var b = await catalogService.GetbyId(id);
+            localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
             if (b != null)
+            {
                 bag = b;
-
+                if(localUser!=null)
+                {
+                    isAddedToCart = await catalogService.CheckExistsInCart(localUser.Email, id) ?? false ;
+                    cartBtnName = "Added in Cart";
+                }
+            }
+            else
+            {
+                isAddedToCart = false;
+                cartBtnName = "Add to Cart";
+            }
         }
 
         await base.OnInitializedAsync();
@@ -112,15 +124,24 @@ else
 
     async Task AddtoCart()
     {
-         if(_dateRange!=null)
-         {
-            localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
-            if(localUser ==null)
+        if (_dateRange != null)
+        {
+           
+            if (localUser == null)
             {
                 NavigationManager.NavigateTo($"/login");
             }
-
-         }
+            else if (localUser.Role == "Renter")
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "You are now login in as renter account. Please login as lessee!");
+            }
+            else
+            {
+                await catalogService.AddToCartAsync(bag, _dateRange, localUser.Email);
+                isAddedToCart = true;
+                cartBtnName = "Added in Cart";
+            }
+        }
     }
-    
+
 }

@@ -1,10 +1,12 @@
-﻿using InstaRent.BlazorApp.Shared.Bags;
+﻿using BlazorDateRangePicker;
+using InstaRent.BlazorApp.Shared.Bags;
 using InstaRent.BlazorApp.Shared.Dto;
-using InstaRent.Catalog.Bags;
+using InstaRent.Cart.Services;
 using InstaRent.Catalog.DailyClicks;
 using InstaRent.Catalog.TotalClicks;
 using System.Net.Http.Json;
 using Volo.Abp.Application.Dtos;
+using BagDto = InstaRent.Catalog.Bags.BagDto;
 
 namespace InstaRent.BlazorApp.Services.Catalog
 {
@@ -13,9 +15,14 @@ namespace InstaRent.BlazorApp.Services.Catalog
         private readonly HttpClient _http;
         string _url = "api/catalog";
         private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
-        public event Action OnChange;
+        public event Action OnAdd;
 
         public CatalogListDto Bags { get; set; }
+
+       
+      
+            
+        
 
         public CatalogService(HttpClient http)
         {
@@ -107,6 +114,59 @@ namespace InstaRent.BlazorApp.Services.Catalog
             return bagdetail;
         }
 
+
+        public async Task AddToCartAsync(BagDto bag, DateRange rentDateRange, string loginuserEmail)
+        {
+            if (bag == null || rentDateRange == null || string.IsNullOrEmpty(loginuserEmail))
+                return;
+            AddBagDto newItem = new AddBagDto();
+            newItem.BagId = bag.Id;
+            newItem.BagName = bag.bag_name;
+            newItem.Tags = bag.tags;
+            newItem.StartDate = rentDateRange.Start.DateTime;
+            newItem.EndDate = rentDateRange.End.DateTime;
+            var noOfDays = (int)(rentDateRange.End - rentDateRange.Start).TotalDays;
+            newItem.Price = bag.price * noOfDays;
+            newItem.ImageUrls = bag.image_urls;
+            newItem.RenterId = bag.renter_id;
+            newItem.LesseeId = loginuserEmail;
+            _url = $"api/cart/items";
+            var response = await _http.PostAsJsonAsync<AddBagDto>(_url, newItem, CancellationToken.None);
+            if (response != null)
+            {
+                var cartlist = await response.Content.ReadFromJsonAsync<CartDto>();
+                OnAdd.Invoke();
+            }
+            
+        }
+
+        public async Task<int?> GetCartItemCountbyUserIdAsync(string lesseeId)
+        {
+            _url = $"api/cart/items/{lesseeId}";
+
+            var cartlist = await _http.GetFromJsonAsync<CartDto>(_url);
+             if (cartlist != null)
+                    return cartlist.Items.Count;
+             
+            return null;
+        }
+
+        public async Task<bool?> CheckExistsInCart(string lesseeId, string bagId)
+        {
+            _url = $"api/cart/items/{lesseeId}";
+
+            var cartlist = await _http.GetFromJsonAsync<CartDto>(_url);
+            if (cartlist != null)
+            {
+                 foreach(var item in cartlist.Items)
+                {
+                    if (item.BagId.ToString() == bagId)
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
 

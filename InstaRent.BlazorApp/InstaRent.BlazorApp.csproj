@@ -37,6 +37,12 @@
     <Reference Include="..\InstaRent.Login.Domain.Shared">
       <HintPath>InstaRent.Login.Domain.Shared.dll</HintPath>
     </Reference>
+    <Reference Include="..\InstaRent.Cart.Application.Contracts">
+      <HintPath>InstaRent.Cart.Application.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="..\InstaRent.Cart.Domain.Shared">
+      <HintPath>InstaRent.Cart.Domain.Shared.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
