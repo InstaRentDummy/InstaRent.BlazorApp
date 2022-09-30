@@ -1,3 +1,15 @@
+using BlazorDateRangePicker;
+using Blazored.LocalStorage;
+using InstaRent.BlazorApp;
+using InstaRent.BlazorApp.Services.Bags;
+using InstaRent.BlazorApp.Services.BlobStorage;
+using InstaRent.BlazorApp.Services.Catalog;
+using InstaRent.BlazorApp.Services.Users;
+using InstaRent.BlazorApp.Shared.Dto;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -22,10 +34,15 @@ builder.Services.AddDateRangePicker(config =>
 
 builder.Services.AddScoped(_ =>
 {
-    return new BlobServiceClient(builder.Configuration.GetValue<string>("AzureBlobStorageSettings:Connection"));
+    return new BlobSettings()
+    {
+        AccountName = builder.Configuration.GetValue<string>("BlobSettings:AccountName"),
+        ContainerName = builder.Configuration.GetValue<string>("BlobSettings:ContainerName"),
+        MaxSize = builder.Configuration.GetValue<int>("BlobSettings:MaxSize"),
+        SASKey = builder.Configuration.GetValue<string>("BlobSettings:SASKey")
+    };
 });
-
-builder.Services.AddScoped<IFileManager, AzureFileManager>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 //builder.Services.AddOidcAuthentication(options =>
 //{

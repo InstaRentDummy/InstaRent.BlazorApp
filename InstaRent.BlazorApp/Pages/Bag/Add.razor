@@ -1,6 +1,7 @@
 ﻿@page "/Bag/Add"
 @page "/Bag/Edit/{id}"
 @using InstaRent.BlazorApp.Features
+@using InstaRent.BlazorApp.Services.BlobStorage
 @using InstaRent.BlazorApp.Shared.Bags
 @using InstaRent.BlazorApp.Shared.Users
 @using InstaRent.BlazorApp.Services.Bags
@@ -13,7 +14,7 @@
 @inject IBagService _bagService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime jsRuntime
-@inject IFileManager _fileManager
+@inject IBlobStorageService blobService
 
 <h3>Bag Entry</h3>
 
@@ -82,15 +83,11 @@ else
         </div>
         <div class="col-12 row mt-2">
             <label for="imageUrl" class="col-md-2 col-form-label">Photo:</label>
-            <div class="col-md-6">
-                <img class="rounded m-1" src="@_imageData" />
-                <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />                
-            </div>
-            <div>
+            <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />
+            @*<div>
                 <InputText id="imageUrl" class="form-control" @bind-Value="imageUrl" />
                 <button type="button" class="btn btn-outline-secondary" @onclick="(() => AddImage(imageUrl))">Add</button>
-            </div>
-            <br>
+            </div>*@
             @foreach (var item in bag.ImageUrls)
             {
                 <div>
@@ -121,23 +118,18 @@ else
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
-        //var maxAllowedFiles = 1;
-        //var format = "image/png";
-        var file = e.File;
-        var buffer = new byte[file.Size];
-        await file.OpenReadStream().ReadAsync(buffer);
-        //var dataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
-        //var base64array = Convert.ToBase64String(buffer);
-        //var filePath = $"{Guid.NewGuid().ToString()}.jpg";
-        var stream = new MemoryStream(buffer);
-        string _name = Guid.NewGuid().ToString();
-        var model = await _fileManager.Upload(file.OpenReadStream(), $"{_name}.jpg", "Bag");
+        var maxAllowedFiles = 1;
+        var inputFile = e.GetMultipleFiles(maxAllowedFiles).First();
+
+        var fileName = await blobService.Upload(inputFile);
+        AddImage(fileName);
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
         user = await localStorage.GetItemAsync<UserInfoDto>("user");
-        
+
         bag = new()
             {
                 RenterId = user.Email,
@@ -190,9 +182,14 @@ else
         imageUrl = string.Empty;
     }
 
-    void RemoveImage(string image)
+    async void RemoveImage(string image)
     {
-        bag.ImageUrls.Remove(image);
+        var result = await blobService.Delete(image);
+        
+        if (result)
+            bag.ImageUrls.Remove(image);
+
+        StateHasChanged();
     }
 
     void Back()

@@ -1,4 +1,5 @@
-﻿using InstaRent.BlazorApp.Shared.Bags;
+﻿using Azure;
+using InstaRent.BlazorApp.Shared.Bags;
 using InstaRent.BlazorApp.Shared.Dto;
 using InstaRent.Catalog.Bags;
 using System.Net.Http.Json;
@@ -11,6 +12,7 @@ namespace InstaRent.BlazorApp.Services.Bags
         private readonly HttpClient _http;
         string _url = "api/catalog/bags";
         private PageParameters _pageParameters = new PageParameters() { PageSize = 5 };
+        AzureSasCredential credential = new AzureSasCredential("?sv=2021-06-08&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2022-12-31T10:33:07Z&st=2022-09-30T02:33:07Z&spr=https&sig=PKydamBAVi5kV9fEEq9bhVs2nSiWLrgEhmzMAz0z8iw%3D");
 
         public BagListDto Bags { get; set; } = new();
 
