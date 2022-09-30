@@ -1,13 +1,3 @@
-using Azure.Storage.Blobs;
-using Blazored.LocalStorage;
-using InstaRent.BlazorApp;
-using InstaRent.BlazorApp.Features;
-using InstaRent.BlazorApp.Services.Bags;
-using InstaRent.BlazorApp.Services.Users;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -21,6 +11,15 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddDateRangePicker(config =>
+{
+    config.Attributes = new Dictionary<string, object>
+                {
+                    { "class", "form-control form-control-sm" }
+                };
+});
+
 builder.Services.AddScoped(_ =>
 {
     return new BlobServiceClient(builder.Configuration.GetValue<string>("AzureBlobStorageSettings:Connection"));

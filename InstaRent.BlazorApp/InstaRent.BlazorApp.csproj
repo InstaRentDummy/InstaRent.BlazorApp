@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
+    <PackageReference Include="BlazorDateRangePicker" Version="4.2.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.9" />
@@ -38,6 +39,12 @@
     </Reference>
     <Reference Include="..\InstaRent.Login.Domain.Shared">
       <HintPath>InstaRent.Login.Domain.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="..\InstaRent.Cart.Application.Contracts">
+      <HintPath>InstaRent.Cart.Application.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="..\InstaRent.Cart.Domain.Shared">
+      <HintPath>InstaRent.Cart.Domain.Shared.dll</HintPath>
     </Reference>
   </ItemGroup>
 
