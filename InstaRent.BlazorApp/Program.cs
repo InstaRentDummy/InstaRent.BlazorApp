@@ -1,5 +1,7 @@
+using Azure.Storage.Blobs;
 using Blazored.LocalStorage;
 using InstaRent.BlazorApp;
+using InstaRent.BlazorApp.Features;
 using InstaRent.BlazorApp.Services.Bags;
 using InstaRent.BlazorApp.Services.Users;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -19,6 +21,12 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped(_ =>
+{
+    return new BlobServiceClient(builder.Configuration.GetValue<string>("AzureBlobStorageSettings:Connection"));
+});
+
+builder.Services.AddScoped<IFileManager, AzureFileManager>();
 
 //builder.Services.AddOidcAuthentication(options =>
 //{

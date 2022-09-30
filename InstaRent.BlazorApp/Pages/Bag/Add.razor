@@ -1,15 +1,19 @@
 ﻿@page "/Bag/Add"
 @page "/Bag/Edit/{id}"
+@using InstaRent.BlazorApp.Features
 @using InstaRent.BlazorApp.Shared.Bags
 @using InstaRent.BlazorApp.Shared.Users
 @using InstaRent.BlazorApp.Services.Bags
 @using InstaRent.BlazorApp.Shared.Dto
 @using InstaRent.BlazorApp.Components
 @using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http.Internal
 @inject ILocalStorageService localStorage
 @inject IBagService _bagService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime jsRuntime
+@inject IFileManager _fileManager
 
 <h3>Bag Entry</h3>
 
@@ -78,12 +82,10 @@ else
         </div>
         <div class="col-12 row mt-2">
             <label for="imageUrl" class="col-md-2 col-form-label">Photo:</label>
-            @*<div class="col-md-6">
-        <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />
-        </div>
-        <div class="col-md-6">
-        <img class="rounded m-1" src="@_imageData" />
-        </div>*@
+            <div class="col-md-6">
+                <img class="rounded m-1" src="@_imageData" />
+                <InputFile type="file" title="search image" id="Photo" name="file" OnChange="@OnInputFileChange" />                
+            </div>
             <div>
                 <InputText id="imageUrl" class="form-control" @bind-Value="imageUrl" />
                 <button type="button" class="btn btn-outline-secondary" @onclick="(() => AddImage(imageUrl))">Add</button>
@@ -119,19 +121,17 @@ else
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
-        var maxAllowedFiles = 3;
-        var format = "image/png";
-
-        //foreach (var imageFile in e.GetMultipleFiles(maxAllowedFiles))
-        //{
-        //    var resizedImageFile = await imageFile.RequestImageFileAsync(format,
-        //        100, 100);
-        //    var buffer = new byte[resizedImageFile.Size];
-        //    await resizedImageFile.OpenReadStream().ReadAsync(buffer);
-        //    product.Photo = $"{Convert.ToBase64String(buffer)}";
-        //    _imageData = $"data:{format};base64,{product.Photo}";
-
-        //}
+        //var maxAllowedFiles = 1;
+        //var format = "image/png";
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+        //var dataUrl = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+        //var base64array = Convert.ToBase64String(buffer);
+        //var filePath = $"{Guid.NewGuid().ToString()}.jpg";
+        var stream = new MemoryStream(buffer);
+        string _name = Guid.NewGuid().ToString();
+        var model = await _fileManager.Upload(file.OpenReadStream(), $"{_name}.jpg", "Bag");
     }
 
     protected override async Task OnInitializedAsync()

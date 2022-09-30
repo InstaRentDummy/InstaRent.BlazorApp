@@ -115,7 +115,7 @@ else
     public EventCallback<string> ValueChanged { get; set; }
 
     [Parameter]
-    public string Value { get; set; }
+    public string Value { get; set; } = "Name";
 
     private void OnValueChange(string val)
     {
