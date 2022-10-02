@@ -19,10 +19,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
 
         public CatalogListDto Bags { get; set; }
 
-       
-      
-            
-        
 
         public CatalogService(HttpClient http)
         {
@@ -44,6 +40,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
             }
 
         }
+
         public async Task LoadCatalogs(string categoryType = null, string userId = "", string filterText = "")
         {
 
@@ -114,7 +111,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
             return bagdetail;
         }
 
-
         public async Task AddToCartAsync(BagDto bag, DateRange rentDateRange, string loginuserEmail)
         {
             if (bag == null || rentDateRange == null || string.IsNullOrEmpty(loginuserEmail))
@@ -137,7 +133,22 @@ namespace InstaRent.BlazorApp.Services.Catalog
                 var cartlist = await response.Content.ReadFromJsonAsync<CartDto>();
                 OnAdd.Invoke();
             }
-            
+
+        }
+
+        public async Task RemoveItemFromCartAsync(string bagId, string loginuserEmail)
+        {
+            if (string.IsNullOrEmpty(bagId) || string.IsNullOrEmpty(loginuserEmail))
+                return;
+
+            _url = $"api/cart/items";
+            var response = await _http.DeleteAsync($"{_url}?BagId={bagId}&Count=1&LesseeId={loginuserEmail}", CancellationToken.None);
+            if (response != null)
+            {
+                await response.Content.ReadFromJsonAsync<CartDto>();
+                OnAdd.Invoke();
+            }
+
         }
 
         public async Task<int?> GetCartItemCountbyUserIdAsync(string lesseeId)
@@ -145,9 +156,21 @@ namespace InstaRent.BlazorApp.Services.Catalog
             _url = $"api/cart/items/{lesseeId}";
 
             var cartlist = await _http.GetFromJsonAsync<CartDto>(_url);
-             if (cartlist != null)
-                    return cartlist.Items.Count;
-             
+            if (cartlist != null)
+                return cartlist.Items.Count;
+
+            return null;
+        }
+
+        public async Task<CartDto> GetCartItembyUserIdAsync(string lesseeId)
+        {
+            _url = $"api/cart/items/{lesseeId}";
+
+            var cartlist = await _http.GetFromJsonAsync<CartDto>(_url);
+
+            if (cartlist != null)
+                return cartlist;
+
             return null;
         }
 
@@ -158,7 +181,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
             var cartlist = await _http.GetFromJsonAsync<CartDto>(_url);
             if (cartlist != null)
             {
-                 foreach(var item in cartlist.Items)
+                foreach (var item in cartlist.Items)
                 {
                     if (item.BagId.ToString() == bagId)
                         return true;
