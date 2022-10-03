@@ -14,6 +14,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
         Task<BagDto?> GetbyId(string id);
         Task AddToCartAsync(BagDto bag, DateRange rentDateRange, string loginuserEmail);
         Task RemoveItemFromCartAsync(string bagId, string loginuserEmail);
+        Task RemoveAllCartAsync(CartDto cartDto, string loginuserEmail);
         Task<int?> GetCartItemCountbyUserIdAsync(string lesseeId);
         Task<CartDto> GetCartItembyUserIdAsync(string lesseeId);
         Task<bool?> CheckExistsInCart(string lesseeId, string bagId);

@@ -4,6 +4,7 @@ using InstaRent.BlazorApp;
 using InstaRent.BlazorApp.Services.Bags;
 using InstaRent.BlazorApp.Services.BlobStorage;
 using InstaRent.BlazorApp.Services.Catalog;
+using InstaRent.BlazorApp.Services.Payment;
 using InstaRent.BlazorApp.Services.Users;
 using InstaRent.BlazorApp.Shared.Dto;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -24,6 +25,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddDateRangePicker(config =>
 {
     config.Attributes = new Dictionary<string, object>

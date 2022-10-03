@@ -151,6 +151,24 @@ namespace InstaRent.BlazorApp.Services.Catalog
 
         }
 
+        public async Task RemoveAllCartAsync(CartDto cartDto, string loginuserEmail)
+        {
+            if (cartDto == null || string.IsNullOrEmpty(loginuserEmail))
+                return;
+
+            _url = $"api/cart/items";
+
+            foreach (var item in cartDto.Items)
+            {
+                var response = await _http.DeleteAsync($"{_url}?BagId={item.BagId}&Count=1&LesseeId={loginuserEmail}", CancellationToken.None);
+
+                if (!response.IsSuccessStatusCode)
+                    return;
+            }
+
+            OnAdd.Invoke();
+        }
+
         public async Task<int?> GetCartItemCountbyUserIdAsync(string lesseeId)
         {
             _url = $"api/cart/items/{lesseeId}";
