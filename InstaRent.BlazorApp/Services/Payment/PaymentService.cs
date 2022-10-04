@@ -49,11 +49,11 @@ namespace InstaRent.BlazorApp.Services.Payment
             string _userId = string.IsNullOrEmpty(userId) ? string.Empty : userId;
             int _skipcount = _pageParameters.PageSize * (currentPage - 1);
 
-            string _userInfo = isLessee ? $"lessee_id={_userId}" : $"renter_Id={_userId}";
+            string _userInfo = isLessee ? $"lessee_id={_userId}" : $"renter_id={_userId}";
             string _dateInfo = $"date_transactedMin={stratDate.ToString("yyyy-MM-dd")}&date_transactedMax={endDate.ToString("yyyy-MM-dd")}";
 
             var response = await _http.GetFromJsonAsync<PagedResultDto<TransactionDto>>($"{_url}/transaction?{_userInfo}&{_dateInfo}&isdeleted=false&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}");
-            var tansactionList = response == null ? new() : response.Items.ToList();
+            var tansactionList = response == null ? new() : (isLessee ? response.Items.ToList() : ClearRenterList(response.Items.ToList(), userId));
 
             var resutDto = PagedList<TransactionDto>.ToPagedList(tansactionList, (int)response.TotalCount, currentPage, _pageParameters.PageSize);
 
@@ -61,6 +61,29 @@ namespace InstaRent.BlazorApp.Services.Payment
             Transactions.Meta = resutDto.MetaData;
         }
 
+        private List<TransactionDto> ClearRenterList(List<TransactionDto> dtos, string userId)
+        {
+            List<TransactionDto> transactionDtos = new List<TransactionDto>();
+
+            foreach (var transaction in dtos)
+            {
+                var temp = new TransactionDto()
+                {
+                    Date_Transacted = transaction.Date_Transacted,
+                    Id = transaction.Id
+                };
+
+                temp.Cart_Items = new List<InstaRent.Payment.CartItems.CartItemDto>();
+
+                if (transaction.Cart_Items.Where(x => x.RenterId == userId).Any())
+                {
+                    temp.Cart_Items.AddRange(transaction.Cart_Items.Where(x => x.RenterId == userId).ToList());
+                }
+                transactionDtos.Add(temp);
+            }
+
+            return transactionDtos;
+        }
 
         private List<InstaRent.Payment.CartItems.CartItemDto> ConvertDtoList(List<CartItemDto> cartItems)
         {
