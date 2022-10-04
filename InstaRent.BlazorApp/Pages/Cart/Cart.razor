@@ -17,6 +17,7 @@
 }
 else
 {
+    <EditForm Model="cartDto" OnValidSubmit="PlaceOrder" class="card card-body bg-light mt-2">
     <div>
         @foreach (var item in cartDto.Items)
         {
@@ -37,13 +38,14 @@ else
             Total (@cartDto.Items.Count): $@cartDto.TotalPrice
         </div>
         <div style="text-align: center; margin-top: 10px;">
-            <button class="btn btn-primary btn-lg" @onclick="PlaceOrder">Place Order</button>
+            <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
         </div>
 
         <div class="text-align: center; margin-top: 10px;">
              <label class="text-danger">@errorMessage</label>
         </div>
     </div>
+    </EditForm>
 }
 
 @code {
@@ -87,6 +89,7 @@ else
         catch (Exception ex)
         {
             errorMessage = ex.Message;
+            //NavigationManager.NavigateTo("/Payment");
         }
     }
 }

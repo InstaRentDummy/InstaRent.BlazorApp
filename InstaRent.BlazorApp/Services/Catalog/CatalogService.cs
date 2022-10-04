@@ -126,6 +126,8 @@ namespace InstaRent.BlazorApp.Services.Catalog
             newItem.ImageUrls = bag.image_urls;
             newItem.RenterId = bag.renter_id;
             newItem.LesseeId = loginuserEmail;
+            newItem.Count = 1;
+
             _url = $"api/cart/items";
             var response = await _http.PostAsJsonAsync<AddBagDto>(_url, newItem, CancellationToken.None);
             if (response != null)

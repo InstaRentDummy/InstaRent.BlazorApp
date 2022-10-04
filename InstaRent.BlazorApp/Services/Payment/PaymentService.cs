@@ -1,4 +1,5 @@
-﻿using InstaRent.Cart.Services;
+﻿using InstaRent.BlazorApp.Shared.Dto;
+using InstaRent.Cart.Services;
 using InstaRent.Payment.Transactions;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
@@ -32,7 +33,10 @@ namespace InstaRent.BlazorApp.Services.Payment
                 return response.Content.ReadFromJsonAsync<TransactionDto>().Result;
             }
             else
-                return null;
+            {
+                var error = response.Content.ReadFromJsonAsync<ErrorResponseMessage>().Result;
+                throw new Exception(error.Error.Message);
+            }
         }
 
 
@@ -57,6 +61,9 @@ namespace InstaRent.BlazorApp.Services.Payment
 
             return cartItemDtos;
         }
+
+
+
 
     }
 }

@@ -6,22 +6,28 @@
 @if (!orderPlaced)
 {
     <h3>PaymentOrder</h3>
+    if (loading)
+    { 
+        <div class="spinner"/>
+    }
+    else
+    {
+        <div class="card card-body bg-light mt-2">
 
-    <div class="card card-body bg-light mt-2">
+            @if (transactionDto != null)
+            {
+                <div class="col-12 row mt-2">
+                    <h4>Total: $@totalAmount</h4>
+                </div>
+                <br />
+                <br />
+                <div class="col-md-12 text-right">
+                    <button type="submit" class="btn btn-success" @onclick="@Payment">Payment</button>
+                </div>
+            }
 
-        @if (transactionDto != null)
-        {
-            <div class="col-12 row mt-2">
-                <h4>Total: $@totalAmount</h4>
-            </div>
-
-            <div class="col-md-12 text-right spinner-border">
-                <button type="submit" class="btn btn-success" @onclick="@Payment">Payment</button>
-            </div>
-        }       
-
-    </div>
-
+        </div>
+    }
 }
 else
 {
@@ -30,7 +36,7 @@ else
 
 
 @code {
-
+    bool loading = false;
     bool orderPlaced = false;
     double totalAmount = 0;
     TransactionDto transactionDto;
@@ -38,12 +44,17 @@ else
     protected override async Task OnInitializedAsync()
     {
         transactionDto = await localStorage.GetItemAsync<TransactionDto>("payment");
+        //transactionDto = new();
         totalAmount = transactionDto.Cart_Items.Sum(x => x.Price);
     }
 
     async void Payment()
     {
+        loading = true;
         await localStorage.RemoveItemAsync("payment");
+        await Task.Delay(1000);
         orderPlaced = true;
+        loading = false;
+        StateHasChanged();
     }
 }
