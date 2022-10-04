@@ -153,10 +153,9 @@ else
 
     private async Task LoadForm()
     {
-        await Task.Delay(500);
+        //await Task.Delay(500);
 
         await GetData(_pageParameters);
-
         StateHasChanged();
     }
 

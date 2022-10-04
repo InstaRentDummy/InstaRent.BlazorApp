@@ -1,0 +1,17 @@
+﻿using InstaRent.BlazorApp.Shared.Dto;
+using InstaRent.Payment.Transactions;
+
+namespace InstaRent.BlazorApp.Shared.Transactions
+{
+    public class TransactionListDto
+    {
+        public List<TransactionDto> Items { get; set; }
+        public MetaData Meta { get; set; }
+    }
+
+    public class SearchInfo
+    {
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+}

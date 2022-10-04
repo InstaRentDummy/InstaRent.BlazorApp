@@ -10,19 +10,19 @@
 @inherits LayoutComponentBase
 
 <style>
-    ul {
+    .ul_main {
         list-style-type: none;
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background-color: #333;
+        background-color: lightgray;
     }
 
-    li {
+    .li_main {
         float: right;
     }
 
-        li a, .dropbtn {
+    .dropbtn li a {
             display: inline-block;
             color: white;
             text-align: center;
@@ -62,6 +62,7 @@
     .dropdown:hover .dropdown-content {
         display: block;
     }
+
 </style>
 
 <div class="page">
@@ -70,28 +71,28 @@
     </div>
 
     <main>
-        <div class="main">
-            <ul>
+        <div class="main">            
+            <ul class="ul_main">
             <AuthorizeView>
                 <NotAuthorized>
-                    <li><a href="login">Login</a></li>
+                        <li class="li_main"><a class="dropbtn" href="login">Login</a></li>
                 </NotAuthorized>
                 <Authorized>                    
                     @{
                         if (localUser.Role == "Lessee")
                         {
-                            <a href="cart" class="btn btn-primary position-relative ms-2">
-                                <i class="bi bi-cart-plus-fill"></i>
-                                <small>Cart</small>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    @cartItemsCount.ToString()
-                                    <span class="visually-hidden">unread messages</span>
-                                </span>
-                            </a>
+                                <a href="cart" class="btn btn-primary position-relative ms-2 dropbtn">
+                                            <i class="bi bi-cart-plus-fill"></i>
+                                            <small>Cart</small>
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                @cartItemsCount.ToString()
+                                                <span class="visually-hidden">unread messages</span>
+                                            </span>
+                                        </a>
                         }                    
                     }
-                    
-                    <li class="dropdown">
+
+                        <li class="dropdown li_main">
                             <a href="javascript:void(0)" class="dropbtn"> Welcome back! @localUser.Name</a>
                         <div class="dropdown-content">
                             <a @onclick="UserProfile">Profile</a>

@@ -1,0 +1,142 @@
+﻿@page "/Transaction/Index"
+@using Blazored.LocalStorage
+@using InstaRent.BlazorApp.Shared.Users
+@using InstaRent.BlazorApp.Shared.Transactions
+@using InstaRent.BlazorApp.Services.Payment
+@using InstaRent.BlazorApp.Shared.Dto
+@using InstaRent.BlazorApp.Components
+@using InstaRent.Payment.Transactions
+@inject IPaymentService _paymentService
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService localStorage
+@inject IJSRuntime JSRuntime
+
+<h3>Transaction History</h3>
+
+
+@if (transactions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="4">
+                     <EditForm Model="searchInfo">
+                                                
+                            <div>
+                                <label for="startDate" class="col-md-2 col-form-label">StartDate:</label>
+                                <InputDate id="startDate" class="form-control" @bind-Value="searchInfo.StartDate" />
+                            </div>
+                            <div>
+                                <label for="endDate" class="col-md-2 col-form-label">EndDate:</label>
+                                <InputDate id="endDate" class="form-control" @bind-Value="searchInfo.EndDate" />
+                            </div>
+                        
+                    </EditForm>
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="4">
+                        <button type="button" class="btn btn-primary" @onclick="@OnSearch">Search</button>
+                    </th>
+                </tr>
+                 <tr>
+                    <th>Id</th>
+                    <th>Transaction Date</th>
+                    <th>Total</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in transactions)
+                {
+                <tr>
+                    <td>@info.Id</td>
+                    <td>@info.Date_Transacted</td>
+                    <td>$@info.Cart_Items.Sum(x=>x.Price)</td>
+                    <td>
+                        <ul>
+                        @foreach(var item in info.Cart_Items)
+                        {
+                            <li>@item.BagName (@item.StartDate.ToString("yyyy/MM/dd") - @item.EndDate.ToString("yyyy/MM/dd")) $@item.Price </li>
+                        }
+                        </ul>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col">
+            <InstaRent.BlazorApp.Components.Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+}
+
+@code {
+
+    SearchInfo searchInfo = new();
+
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 5};
+    private List<TransactionDto> transactions;
+    public bool Show { get; set; } = false;
+    int _tempId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        searchInfo.StartDate = DateTime.Now.AddMonths(-1);
+        searchInfo.EndDate = DateTime.Now;
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        _pageParameters.PageNumber = page;
+        await GetData(_pageParameters);
+    }
+
+    private async Task LoadForm()
+    {
+        //await Task.Delay(500);
+
+        await GetData(_pageParameters);
+        StateHasChanged();
+    }
+
+    async void OnSearch()
+    {
+        await GetData(_pageParameters);
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("Authors - OnAfterRenderAsync - firstRender = " + firstRender);
+
+        if (firstRender)
+        {
+            await LoadForm();
+
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task GetData(PageParameters parameters)
+    {
+        var user = await localStorage.GetItemAsync<UserInfoDto>("user");
+        
+        await _paymentService.GetListByUserId(parameters.PageNumber, user.Email, searchInfo.StartDate, searchInfo.EndDate, user.Role.Equals("Lessee"));
+               
+        transactions = _paymentService.Transactions.Items;
+        MetaData = _paymentService.Transactions.Meta;
+    }
+
+}
