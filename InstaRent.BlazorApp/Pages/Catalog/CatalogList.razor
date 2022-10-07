@@ -1,11 +1,14 @@
 ﻿@page "/catalog"
+@using Blazored.LocalStorage
 @using InstaRent.BlazorApp.Shared.Bags
 @using InstaRent.BlazorApp.Services.Catalog
 @using InstaRent.BlazorApp.Components
 @using InstaRent.BlazorApp.Shared.Dto
+@using InstaRent.BlazorApp.Shared.Users
 @inject ICatalogService catalogService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject ILocalStorageService localStorage
 @*<h3>Catalog List</h3>*@
 
 
@@ -135,13 +138,23 @@
         shouldPrevent = false;
     }
 
-    
+
 
     async Task LoadList()
     {
+        var uId = "";
+        if (ActivePage == "Recommend for you")
+        {
 
-        await catalogService.LoadCatalogs(categoryType: ActivePage, filterText: _searchValue);
-        
+            var localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
+            if (localUser != null)
+                uId = localUser.Id;
+            else
+                ActivePage = "Trending";//redirect to default;
+        }
+
+            await catalogService.LoadCatalogs(categoryType: ActivePage,userId: uId, filterText: _searchValue);
+
     }
 
 }

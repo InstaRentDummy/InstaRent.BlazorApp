@@ -11,30 +11,38 @@
 
 <EditForm Model="loginInfo" OnValidSubmit="HandleLogin">
     <DataAnnotationsValidator />
-        
-    <div class="form-check">
-        <label for="username">Email</label>
-        <InputText id="username" @bind-Value="loginInfo.Email" class="form-control" />
-        <ValidationMessage For="@(() => loginInfo.Email)" />
-    </div>
+    <div class="card" style="min-width: 18rem; max-width: 28rem;">
+        <div class="form-check mb-3">
+            <label for="username" class="col-form-label">Email</label>
+            <div class="col-12 pe-4">
+                <InputText id="username" @bind-Value="loginInfo.Email" class="form-control" />
+                <ValidationMessage For="@(() => loginInfo.Email)" />
+            </div>
+        </div>
 
-    <div class="form-check">
-        <label for="password">Password</label>
-        <InputText id="password" @bind-Value="loginInfo.Password" type="password" class="form-control" />
-        <ValidationMessage For="@(() => loginInfo.Password)" />
-    </div>
+        <div class="form-check mb-3">
+            <label for="password" class="col-form-label">Password</label>
+            <div class="col-12 pe-4">
+                <InputText id="password" @bind-Value="loginInfo.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => loginInfo.Password)" />
+            </div>
 
-    <div class="form-check">
-        <button type="submit" class="btn btn-primary">Sign in</button>
-    </div>
+        </div>
 
-    <div class="form-check">
-        <label class="text-danger">@loginInfo.ErrorMessage</label>
-    </div>
+        <div class="form-check mb-3 row">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+        </div>
 
-    <NavLink href="/User/Add">
-        <h6 class="font-weight-normal text-end">Create account</h6>
-    </NavLink>
+        <div class="form-check">
+            <label class="text-danger">@loginInfo.ErrorMessage</label>
+        </div>
+
+        <NavLink href="/User/Add" class="mb-3 me-3">
+            <h6 class="font-weight-normal text-end me-3">Create account</h6>
+        </NavLink>
+    </div>
 </EditForm>
 
 @code {
@@ -47,7 +55,7 @@
         {
             loginInfo.ErrorMessage = " ";
             var result = await _userService.Login(loginInfo);
-        
+
             if (result != null)
             {
                 await LocalStorage.SetItemAsync<UserInfoDto>("user", result);
@@ -57,11 +65,11 @@
             }
             else
             {
-                loginInfo.ErrorMessage ="Invalid Email or Password";
+                loginInfo.ErrorMessage = "Invalid Email or Password";
                 StateHasChanged();
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             loginInfo.ErrorMessage = ex.Message;
             StateHasChanged();

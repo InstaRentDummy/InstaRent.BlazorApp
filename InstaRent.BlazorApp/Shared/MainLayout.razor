@@ -9,109 +9,71 @@
 @inject NavigationManager NavigationManager
 @inherits LayoutComponentBase
 
-<style>
-    .ul_main {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: lightgray;
-    }
-
-    .li_main {
-        float: right;
-    }
-
-    .dropbtn li a {
-            display: inline-block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-
-            li a:hover, .dropdown:hover .dropbtn {
-                background-color: lightgray;
-            }
-
-        li.dropdown {
-            display: inline-block;
-        }
-
-    .dropdown-content {
-        display: none;
-        position: fixed; /* change here...*/
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            text-align: left;
-        }
-
-            .dropdown-content a:hover {
-                background-color: dimgray;
-            }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
-</style>
-
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="main">            
-            <ul class="ul_main">
-            <AuthorizeView>
-                <NotAuthorized>
-                        <li class="li_main"><a class="dropbtn" href="login">Login</a></li>
-                </NotAuthorized>
-                <Authorized>                    
-                    @{
-                        if (localUser.Role == "Lessee")
-                        {
-                                <a href="cart" class="btn btn-primary position-relative ms-2 dropbtn">
-                                            <i class="bi bi-cart-plus-fill"></i>
-                                            <small>Cart</small>
-                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                @cartItemsCount.ToString()
-                                                <span class="visually-hidden">unread messages</span>
-                                            </span>
-                                        </a>
-                        }                    
-                    }
 
-                        <li class="dropdown li_main">
-                            <a href="javascript:void(0)" class="dropbtn"> Welcome back! @localUser.Name</a>
-                        <div class="dropdown-content">
-                            <a @onclick="UserProfile">Profile</a>
-                            <a @onclick="Logout">Logout</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid justify-content-end">
+
+                <AuthorizeView>
+                    <NotAuthorized>
+
+                        <div class="d-flex">
+                            <i class="bi bi-person"></i>
+                            <a class="btn btn-outline-dark me-5" href="login">Login</a>
                         </div>
-                    </li>
+                    </NotAuthorized>
+                    <Authorized>
+                        @{
+                            if (localUser.Role == "Lessee")
+                            {
+                                <a href="cart" class="btn btn-primary position-relative me-3 mt-1 dropbtn">
+                                    <i class="bi bi-cart-plus-fill"></i>
+                                    <small>Cart</small>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        @cartItemsCount.ToString()
+                                        <span class="visually-hidden">unread messages</span>
+                                    </span>
+                                </a>
+                            }
+                        }
+                        <div class="dropdown  nav-item">
+                            <button class="btn btn-light dropdown-toggle me-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                Welcome back, @localUser.Name!
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 
-                </Authorized>
-            </AuthorizeView>
-            </ul>
-        </div>
+                                <li>
+                                    <a role="button" class="dropdown-item"
+                                       @onclick="UserProfile">
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a role="button" class="dropdown-item"
+                                       @onclick="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
 
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+
+        </nav>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
 
-@code{
+@code {
     UserInfoDto localUser = new();
     int? cartItemsCount;
     protected override async Task OnInitializedAsync()

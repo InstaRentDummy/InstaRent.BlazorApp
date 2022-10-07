@@ -49,6 +49,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
             int _ttlcount = 0;
             string _url = "";
 
+
             switch (categoryType)
             {
                 case "Popular":
@@ -65,7 +66,8 @@ namespace InstaRent.BlazorApp.Services.Catalog
                     }
                 case "Recommend for you":
                     {
-                        _url = $"api/catalog/recommendation?userId={userId}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                       
+                        _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
                         var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
                         if (response != null)
                         {

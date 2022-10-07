@@ -20,5 +20,5 @@ FROM nginx:alpine AS final
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY ["InstaRent.BlazorApp/nginx.conf", "/etc/nginx/nginx.conf"]
-COPY ["etc/dev-cert/localhost.crt", "/etc/nginx/localhost.crt"]  
-COPY ["etc/dev-cert/localhost.rsa", "/etc/nginx/localhost.rsa"]  
+COPY ["etc/dev-cert/app-cert.pem", "/etc/nginx/app-cert.pem"]  
+COPY ["etc/dev-cert/app-cert-key.pem", "/etc/nginx/app-cert-key.pem"]  
