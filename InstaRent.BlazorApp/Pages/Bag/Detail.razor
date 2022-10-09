@@ -50,17 +50,24 @@ else
                 <div class="card border-dark mb-3">
                  
                     <div class="card-body">
-                        <h6>Rent Period: </h6> <DateRangePicker  MinDate="DateTimeOffset.Now" MaxDate="@bag.rental_end_date" OnRangeSelect="OnRangeSelect" />
+                        <h6>Rent Period: </h6> <DateRangePicker d MinDate="DateTimeOffset.Now" MaxDate="@bag.rental_end_date" OnRangeSelect="OnRangeSelect" />
                         <p class="card-text">No of Days : @totalDays</p>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-danger">Blackout Period:</h6>
+                        @foreach (var blkout in _blackoutDateRange)
+                        {
+                            <p class="card-text"> @blkout.Start.Date.ToShortDateString() - @blkout.End.Date.ToShortDateString()   </p>
+                        }
                     </div>
                     <div class="card-footer text-white bg-dark">
                         Total: <span class="card-text">S$ @totalAmt.ToString("N02")</span>
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-light align-self-end" disabled=@isAddedToCart onclick ="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>@cartBtnName</small> </button>
+                            <button class="btn btn-light align-self-end" disabled=@blkAddToCart onclick ="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>@cartBtnName</small> </button>
                         </div>
                     </div>
                     <div class="d-flex p-2">
-                        <a href="" class="link-dark">Go to Shopping Cart<i class="bi bi-arrow-right-square-fill ms-2"></i></a>
+                        <a href="/cart" class="link-dark">Go to Shopping Cart<i class="bi bi-arrow-right-square-fill ms-2"></i></a>
                     </div>
                 </div>
                 
@@ -85,8 +92,9 @@ else
     private BagDto bag;
     private int totalDays;
     private double totalAmt;
-    private bool isAddedToCart;
+    private bool blkAddToCart;
     private DateRange _dateRange;
+    private List<DateRange> _blackoutDateRange=new List<DateRange>();
     private string cartBtnName;
     protected override async Task OnInitializedAsync()
     {
@@ -97,17 +105,22 @@ else
             if (b != null)
             {
                 bag = b;
-                if(localUser!=null)
+                if (localUser != null)
                 {
-                    isAddedToCart = await catalogService.CheckExistsInCart(localUser.Email, id) ?? false ;
-                    cartBtnName = "Added in Cart";
+                    blkAddToCart = await catalogService.CheckExistsInCart(localUser.Email, id) ?? false;
+                    if (blkAddToCart)
+                        cartBtnName = "Added in Cart";
+                    else
+                        cartBtnName = "Add to Cart";
+
                 }
             }
             else
             {
-                isAddedToCart = false;
+                blkAddToCart = false;
                 cartBtnName = "Add to Cart";
             }
+            _blackoutDateRange = await catalogService.BlackOutDates(id);
         }
 
         await base.OnInitializedAsync();
@@ -116,9 +129,21 @@ else
 
     public void OnRangeSelect(DateRange range)
     {
+        foreach(DateRange blkdate in _blackoutDateRange)
+        {
+            if ((range.Start >= blkdate.Start && range.Start <= blkdate.End) ||
+            (range.End >= blkdate.Start && range.End <= blkdate.End) )
+            {
+                JSRuntime.InvokeVoidAsync("alert", "The selected date is not availble for rent");
+                blkAddToCart = true;
+                return;
+            }
+             
+        }
         totalDays = (int)(range.End - range.Start).TotalDays;
         totalAmt = bag.price * totalDays;
         _dateRange = range;
+        blkAddToCart = false;
     }
     UserInfoDto localUser = new();
 
@@ -138,7 +163,7 @@ else
             else
             {
                 await catalogService.AddToCartAsync(bag, _dateRange, localUser.Email);
-                isAddedToCart = true;
+                blkAddToCart = true;
                 cartBtnName = "Added in Cart";
             }
         }

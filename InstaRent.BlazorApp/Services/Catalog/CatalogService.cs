@@ -4,6 +4,7 @@ using InstaRent.BlazorApp.Shared.Dto;
 using InstaRent.Cart.Services;
 using InstaRent.Catalog.DailyClicks;
 using InstaRent.Catalog.TotalClicks;
+using InstaRent.Payment.Transactions;
 using System.Net.Http.Json;
 using Volo.Abp.Application.Dtos;
 using BagDto = InstaRent.Catalog.Bags.BagDto;
@@ -211,6 +212,36 @@ namespace InstaRent.BlazorApp.Services.Catalog
             }
 
             return false;
+        }
+
+        public async Task<List<DateRange>> BlackOutDates(string bagId)
+        {
+            _url = $"api/payment/transaction?bag_id={bagId}";
+            List<DateRange> rented = new List<DateRange>(); 
+            var translist = await _http.GetFromJsonAsync<PagedResultDto<TransactionDto>>(_url);
+
+            foreach(var cart in translist.Items)
+            {
+                foreach(var bag in cart.Cart_Items)
+                {
+                    if(bag.BagId.ToString() == bagId)
+                    {
+
+                        if (bag.EndDate >= DateTime.Now)
+                        {
+                            DateRange r = new DateRange();
+                            if (bag.StartDate >= DateTime.Now)
+                                r.Start = bag.StartDate;
+                            else
+                                r.Start = bag.EndDate ;
+                            r.End = bag.EndDate;
+                            rented.Add(r);
+                        }
+                    }
+                }
+            }
+            return rented;
+
         }
     }
 }

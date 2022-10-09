@@ -18,33 +18,46 @@
 else
 {
     <EditForm Model="cartDto" OnValidSubmit="PlaceOrder" class="card card-body bg-light mt-2">
-    <div>
-        @foreach (var item in cartDto.Items)
-        {
-            <div class="card-group">
-                <div class="card-img">
-                    <img src="@item.ImageUrls[0]" width="50" height="50" class="img-thumbnail" />
-                </div>
-                <div class="card-body">
-                    <h5>@item.BagName</h5>
-                    <span>From @item.StartDate</span>
-                    <span>To @item.EndDate</span><br />
-                    <button class="btn-delete" @onclick="@(() => DeleteItem(item))">Remove</button>
-                </div>
-                <div >$@item.price</div>
-            </div>
-        }
-        <div class="item-price">
-            Total (@cartDto.Items.Count): $@cartDto.TotalPrice
-        </div>
-        <div style="text-align: center; margin-top: 10px;">
-            <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
-        </div>
+        <div class="container flex-fill">
+            <div class="card">
+                @foreach (var item in cartDto.Items)
+                {
+                    <div class="row g-0">
+                        <div class="col-md-2">
+                            <img src="@item.ImageUrls[0]" class="img-thumbnail rounded-start " alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5>@item.BagName</h5>
+                                <h6>Rent Period: @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</h6>
+                                <p class="card-text">
+                                    No of Days :  @(getNoofDays(@item.StartDate, item.EndDate))
 
-        <div class="text-align: center; margin-top: 10px;">
-             <label class="text-danger">@errorMessage</label>
+                                </p>
+                                <span class="card-text"><strong>S$ @item.price.ToString("N02")</strong></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                            <button class="btn btn-outline-danger m-3" @onclick="@(() => DeleteItem(item))"><i class="bi bi-dash-circle-fill me-2"></i>Remove</button>
+                        </div>
+                    </div>
+                }
+
+                <div class="card-footer">
+                    <div class="item-price">
+                        <span class="text-success"><strong>Total (@cartDto.Items.Count) : S$@cartDto.TotalPrice.ToString("N02")</strong></span>
+                    </div>
+                    <div style=" text-align: center; margin-top: 10px;">
+                        <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 10px;">
+                        <label class="text-danger">@errorMessage</label>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
     </EditForm>
 }
 
@@ -91,6 +104,11 @@ else
             errorMessage = ex.Message;
             //NavigationManager.NavigateTo("/Payment");
         }
+    }
+
+    private int getNoofDays(DateTime start, DateTime end)
+    {
+        return (int)(end.Date - start.Date).TotalDays;
     }
 }
 

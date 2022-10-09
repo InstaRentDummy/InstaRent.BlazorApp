@@ -29,6 +29,7 @@ namespace InstaRent.BlazorApp
 
                 state = new AuthenticationState(new ClaimsPrincipal(identity));
             }
+             
 
             NotifyAuthenticationStateChanged(Task.FromResult(state));
 
