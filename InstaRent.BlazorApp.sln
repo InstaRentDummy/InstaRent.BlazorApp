@@ -5,6 +5,10 @@ VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstaRent.BlazorApp", "InstaRent.BlazorApp\InstaRent.BlazorApp.csproj", "{8F8AA688-B91B-4814-B7E9-85ED5F78C28F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{FFA687B3-3A0B-4D84-9DDA-572950B9E308}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstaRent.BlazorApp.Test", "test\InstaRent.BlazorApp.Test\InstaRent.BlazorApp.Test.csproj", "{355E2DED-40E4-4E9D-AD03-C568538E7078}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{8F8AA688-B91B-4814-B7E9-85ED5F78C28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F8AA688-B91B-4814-B7E9-85ED5F78C28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F8AA688-B91B-4814-B7E9-85ED5F78C28F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{355E2DED-40E4-4E9D-AD03-C568538E7078}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{355E2DED-40E4-4E9D-AD03-C568538E7078}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{355E2DED-40E4-4E9D-AD03-C568538E7078}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{355E2DED-40E4-4E9D-AD03-C568538E7078}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{355E2DED-40E4-4E9D-AD03-C568538E7078} = {FFA687B3-3A0B-4D84-9DDA-572950B9E308}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33B69EFD-45E3-4F9E-A712-B9854845415B}
