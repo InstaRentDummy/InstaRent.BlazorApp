@@ -246,7 +246,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
 
         public async Task<bool> CheckRentedDate(string bagId, DateRange rentDateRange)
         {
-            _url = $"api/payment/transaction/checktransaction?bag_id={bagId}&StartDate={rentDateRange.Start.Date.ToString("yyyy-MM-dd")}&endDate={rentDateRange.End.Date.ToString("yyyy-MM-dd")}";
+            _url = $"api/payment/transaction/checktransaction?bagid={bagId}&startDate={rentDateRange.Start.Date.ToString("yyyy-MM-dd")}&EndDate={rentDateRange.End.Date.ToString("yyyy-MM-dd")}";
            
             return await _http.GetFromJsonAsync<bool>(_url);
              
