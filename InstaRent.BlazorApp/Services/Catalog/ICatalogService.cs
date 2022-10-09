@@ -19,5 +19,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
         Task<CartDto> GetCartItembyUserIdAsync(string lesseeId);
         Task<bool?> CheckExistsInCart(string lesseeId, string bagId);
         Task<List<DateRange>> BlackOutDates(string bagId);
+        Task<bool> CheckRentedDate(string bagId, DateRange rentDateRange);
     }
 }

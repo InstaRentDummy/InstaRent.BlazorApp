@@ -96,6 +96,8 @@ else
     private DateRange _dateRange;
     private List<DateRange> _blackoutDateRange=new List<DateRange>();
     private string cartBtnName;
+    UserInfoDto localUser = new();
+
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(id))
@@ -127,25 +129,22 @@ else
         StateHasChanged();
     }
 
-    public void OnRangeSelect(DateRange range)
+    public async Task OnRangeSelect(DateRange range)
     {
-        foreach(DateRange blkdate in _blackoutDateRange)
+        var isRented = await catalogService.CheckRentedDate(id, range);
+        if (isRented)
         {
-            if ((range.Start >= blkdate.Start && range.Start <= blkdate.End) ||
-            (range.End >= blkdate.Start && range.End <= blkdate.End) )
-            {
-                JSRuntime.InvokeVoidAsync("alert", "The selected date is not availble for rent");
-                blkAddToCart = true;
-                return;
-            }
-             
+            await JSRuntime.InvokeVoidAsync("alert", "The selected date is not availble for rent");
+            blkAddToCart = true;
+            return;
         }
+
         totalDays = (int)(range.End - range.Start).TotalDays;
         totalAmt = bag.price * totalDays;
         _dateRange = range;
         blkAddToCart = false;
     }
-    UserInfoDto localUser = new();
+
 
     async Task AddtoCart()
     {
