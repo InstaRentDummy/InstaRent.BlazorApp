@@ -45,10 +45,10 @@ else
                     </th>
                 </tr>
                  <tr>
-                    <th>Id</th>
-                    <th>Transaction Date</th>
-                    <th>Total</th>
+                    <th>Transaction Id</th>
+                    <th>Transaction Date</th>                    
                     <th>Items</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,8 +56,7 @@ else
                 {
                 <tr>
                     <td>@info.Id</td>
-                    <td>@info.Date_Transacted</td>
-                    <td>$@info.Cart_Items.Sum(x=>x.Price)</td>
+                    <td>@info.Date_Transacted</td>                    
                     <td>
                         <ul>
                         @foreach(var item in info.Cart_Items)
@@ -66,6 +65,7 @@ else
                         }
                         </ul>
                     </td>
+                    <td>$@info.Cart_Items.Sum(x=>x.Price)</td>
                 </tr>
                 }
             </tbody>
