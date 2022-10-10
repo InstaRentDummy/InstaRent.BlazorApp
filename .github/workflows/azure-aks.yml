@@ -34,7 +34,7 @@ on:
 
 env:
   AZURE_CONTAINER_REGISTRY: "instarent"
-  CONTAINER_NAME: "blazorapp"
+  CONTAINER_NAME: "instarent-blazorapp"
   RESOURCE_GROUP: "instarent-eas-rg"
   CLUSTER_NAME: "instarent-aks"
   IMAGE_PULL_SECRET_NAME: "instrarent-image-pull-secret"
@@ -61,7 +61,7 @@ jobs:
     # Builds and pushes an image up to your Azure Container Registry
     - name: Build and push image to ACR
       run: |
-        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} -f ./InstaRent.BlazorApp/Dockerfile .
+        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} -f ./InstaRent.BlazorApp/Dockerfile .
   createSecret:
     permissions:
       contents: read
@@ -137,6 +137,6 @@ jobs:
         action: deploy
         manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
         images: |
-          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
+          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}
         imagepullsecrets: |
           ${{ env.IMAGE_PULL_SECRET_NAME }}
