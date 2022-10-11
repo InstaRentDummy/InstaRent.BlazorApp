@@ -37,7 +37,7 @@ env:
   CONTAINER_NAME: "instarent-blazorapp"
   RESOURCE_GROUP: "instarent-eas-rg"
   CLUSTER_NAME: "instarent-aks"
-  IMAGE_PULL_SECRET_NAME: "instrarent-image-pull-secret"
+  IMAGE_PULL_SECRET_NAME: "instarent-image-pull-secret"
   DEPLOYMENT_MANIFEST_PATH: 'manifests/deployment.yaml'
 
 jobs:
