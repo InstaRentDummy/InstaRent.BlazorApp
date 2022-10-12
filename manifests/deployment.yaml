@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: blazorapp
-        image: instarent.azurecr.io/instarent-blazorapp:latest
+        image: instarent.azurecr.io/instarentblazorapp:latest
         ports:
         - containerPort: 80
         - containerPort: 443
