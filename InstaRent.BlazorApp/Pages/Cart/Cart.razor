@@ -16,10 +16,11 @@
     <span>You have no items in your cart.</span>
 }
 else
-{
+{    
     <EditForm Model="cartDto" OnValidSubmit="PlaceOrder" class="card card-body bg-light mt-2">
         <div class="container flex-fill">
             <div class="card">
+                
                 @foreach (var item in cartDto.Items)
                 {
                     <div class="row g-0">
@@ -30,10 +31,12 @@ else
                             <div class="card-body">
                                 <h5>@item.BagName</h5>
                                 <h6>Rent Period: @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</h6>
+                                
                                 <p class="card-text">
                                     No of Days :  @(getNoofDays(@item.StartDate, item.EndDate))
 
                                 </p>
+                                @*<Rating Color="Color.Secondary" @bind-Value="@Value" MaxValue="5" />*@
                                 <span class="card-text"><strong>S$ @item.price.ToString("N02")</strong></span>
                             </div>
                         </div>
@@ -64,6 +67,7 @@ else
 @code {
     CartDto cartDto;
     bool orderPlaced = false;
+    int Value = 1;
     string errorMessage = string.Empty;
     UserInfoDto localUser = new();
 

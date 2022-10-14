@@ -59,7 +59,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
                         if (response != null)
                         {
-                            Bags.Items = response.Items.Select(c => c.Bag).ToList();
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
                             _ttlcount = (int)response.TotalCount;
                         }
 
@@ -67,12 +67,12 @@ namespace InstaRent.BlazorApp.Services.Catalog
                     }
                 case "Recommend for you":
                     {
-                       
+
                         _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
                         var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
                         if (response != null)
                         {
-                            Bags.Items = response.Items.ToList();
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
                             _ttlcount = (int)response.TotalCount;
                         }
                         break;
@@ -83,9 +83,9 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
                         if (response != null)
                         {
-                            List<BagDto> _bags = new List<BagDto>();
+                            List<BagInfoDto> _bags = new List<BagInfoDto>();
                             var bag = response.Items.ToList();
-                            bag.ForEach(x => _bags.Add(x.Bag));
+                            bag.ForEach(x => _bags.Add(ConvertInfo(x.Bag)));
                             Bags = new CatalogListDto();
                             Bags.Items = _bags;
                             _ttlcount = (int)response.TotalCount;
@@ -93,9 +93,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         break;
                     }
             }
-
-
-
 
             Bags.Meta = new MetaData()
             {
@@ -217,14 +214,14 @@ namespace InstaRent.BlazorApp.Services.Catalog
         public async Task<List<DateRange>> BlackOutDates(string bagId)
         {
             _url = $"api/payment/transaction?bag_id={bagId}";
-            List<DateRange> rented = new List<DateRange>(); 
+            List<DateRange> rented = new List<DateRange>();
             var translist = await _http.GetFromJsonAsync<PagedResultDto<TransactionDto>>(_url);
 
-            foreach(var cart in translist.Items)
+            foreach (var cart in translist.Items)
             {
-                foreach(var bag in cart.Cart_Items)
+                foreach (var bag in cart.Cart_Items)
                 {
-                    if(bag.BagId.ToString() == bagId)
+                    if (bag.BagId.ToString() == bagId)
                     {
 
                         if (bag.EndDate >= DateTime.Now)
@@ -233,7 +230,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
                             if (bag.StartDate >= DateTime.Now)
                                 r.Start = bag.StartDate;
                             else
-                                r.Start = bag.EndDate ;
+                                r.Start = bag.EndDate;
                             r.End = bag.EndDate;
                             rented.Add(r);
                         }
@@ -247,10 +244,32 @@ namespace InstaRent.BlazorApp.Services.Catalog
         public async Task<bool> CheckRentedDate(string bagId, DateRange rentDateRange)
         {
             _url = $"api/payment/transaction/checktransaction?bagid={bagId}&startDate={rentDateRange.Start.Date.ToString("yyyy-MM-dd")}&EndDate={rentDateRange.End.Date.ToString("yyyy-MM-dd")}";
-           
-            return await _http.GetFromJsonAsync<bool>(_url);
-             
 
+            return await _http.GetFromJsonAsync<bool>(_url);
+
+
+        }
+
+        private BagInfoDto ConvertInfo(BagDto? dto)
+        {
+            BagInfoDto info = new();
+
+            if (dto != null)
+            {
+                info.Id = dto.Id.ToString();
+                info.BagName = dto.bag_name;
+                info.Description = dto.description;
+                info.ImageUrls = dto.image_urls;
+                info.Price = dto.price;
+                info.Tags = dto.tags;
+                info.RentalStartDate = dto.rental_start_date;
+                info.RentalEndDate = dto.rental_end_date;
+                info.Status = dto.status;
+                info.RenterId = dto.renter_id;
+                info.AvgRating = dto.AvgRating == null ? 0 : Convert.ToInt32(dto.AvgRating);
+            }
+
+            return info;
         }
     }
 }

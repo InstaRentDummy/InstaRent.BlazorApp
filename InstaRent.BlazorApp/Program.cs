@@ -1,5 +1,8 @@
 using BlazorDateRangePicker;
 using Blazored.LocalStorage;
+using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
 using InstaRent.BlazorApp;
 using InstaRent.BlazorApp.Services.Bags;
 using InstaRent.BlazorApp.Services.BlobStorage;
@@ -11,6 +14,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -18,6 +22,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Configuration.AddEnvironmentVariables();
 
 var baseURL = builder.Configuration.GetValue<string>("App:BaseUrl");
+
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseURL) });
 builder.Services.AddScoped<IBagService, BagService>();
@@ -53,5 +58,14 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 //    // For more information, see https://aka.ms/blazor-standalone-auth
 //    builder.Configuration.Bind("Local", options.ProviderOptions);
 //});
+
+builder.Services
+    .AddBlazorise(options =>
+    {
+        options.Immediate = true;
+    })
+    .AddBootstrap5Providers()
+    .AddFontAwesomeIcons();
+
 
 await builder.Build().RunAsync();

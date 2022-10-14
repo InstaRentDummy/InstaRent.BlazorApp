@@ -1,5 +1,7 @@
 ﻿using InstaRent.BlazorApp.Shared.Bags;
 using InstaRent.BlazorApp.Shared.Dto;
+using InstaRent.BlazorApp.Shared.Transactions;
+//using InstaRent.Cart.Services;
 using InstaRent.Catalog.Bags;
 using System.Net.Http.Json;
 using Volo.Abp.Application.Dtos;
@@ -76,6 +78,32 @@ namespace InstaRent.BlazorApp.Services.Bags
         public async Task<HttpResponseMessage> Delete(string bagId)
         {
             return await _http.DeleteAsync(_url + $"/{bagId}");
+        }
+
+        public async Task AddBagRatingAsync(List<BagRating> bagList)
+        {
+            if (bagList == null)
+                return;
+
+            foreach (var bagRating in bagList)
+            {
+                var bagRatingDto = new BagRatingDto()
+                {
+                    BagId = bagRating.CartItem.BagId,
+                    Rating = bagRating.RatingNo
+                };
+                var response = await _http.PostAsJsonAsync<BagRatingDto>($"{_url}/rate", bagRatingDto, CancellationToken.None);
+
+                if (response != null)
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
         }
 
         private BagInfoDto ConvertInfo(BagDto? dto)
