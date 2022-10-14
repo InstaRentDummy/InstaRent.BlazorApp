@@ -22,10 +22,38 @@ else
     <p>
         <button class="btn btn-primary" @onclick="OnAddNew">New Bag</button>
     </p>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+
+            <div class="dropdown  nav-item">
+
+                <button class="btn btn-secondary dropdown-toggle me-2" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    @ActiveType
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    @foreach (string type in Types)
+                    {
+                        <li>
+                            <a role="button" class="dropdown-item"
+                       @onclick=@( () => ActivateType(type) )>
+                                @type
+                            </a>
+                        </li>
+
+                    }
+                </ul>
+            </div>
+            <form class="d-flex w-100">
+                <input class="form-control" placeholder="search" @bind-value="@Value" @oninput="@(e => OnSearchTextChanged(e, ActiveType))" />
+               @* <input class="form-control" placeholder="search" @bind="_searchValue" @bind:event="oninput" @onkeypress="@KeyHandler" @onkeypress:preventDefault="shouldPrevent" />*@
+            </form>
+        </div>
+    </nav>
+
     <div class="row col-12">
         <table class="table">
             <thead>
-                <tr>
+               @* <tr>
                     <th colspan="4">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input"  type="radio" id="BagName" @onchange=@(()=>OnValueChange(NameVal)) checked="@(Value==@NameVal)">
@@ -49,7 +77,7 @@ else
                     <th colspan="4">
                         <input class="form-control" placeholder="search" @oninput="@(e => OnSearchTextChanged(e, Value))" />
                     </th>
-                </tr>
+                </tr>*@
             </thead>
             <tbody>
                 @foreach (var info in bags)
@@ -105,10 +133,13 @@ else
 }
 
 @code {
-    string NameVal = "Name";
-    string DescriptionVal = "Description";
-    string TagsVal = "Tags";
-    string StatusVal = "Status";
+    //string NameVal = "Name";
+    //string DescriptionVal = "Description";
+    //string TagsVal = "Tags";
+    //string StatusVal = "Status";
+
+    public string ActiveType { get; set; } = "Name";
+    List<string> Types = new List<string>() { "Name", "Description", "Tags", "Status" };
 
     public MetaData MetaData { get; set; } = new MetaData();
     private PageParameters _pageParameters = new PageParameters() { PageSize = 5};
@@ -117,16 +148,29 @@ else
     int _tempId = 0;
     string _name, _description, _tag, _status;
 
-    [Parameter]
-    public EventCallback<string> ValueChanged { get; set; }
+    //[Parameter]
+    //public EventCallback<string> ValueChanged { get; set; }
 
     [Parameter]
-    public string Value { get; set; } = "Name";
+    public string Value { get; set; } = "";
 
-    private void OnValueChange(string val)
+    //private void OnValueChange(string val)
+    //{
+    //    Value = val;
+    //    ValueChanged.InvokeAsync(val);
+    //}
+
+    async Task ActivateType(string type)
     {
-        Value = val;
-        ValueChanged.InvokeAsync(val);
+        ActiveType = type;
+        Value = string.Empty;
+
+        _name = string.Empty;
+        _description = string.Empty;
+        _tag = string.Empty;
+        _status = string.Empty;
+
+        await LoadForm();
     }
 
     void OnAddNew()
@@ -167,6 +211,9 @@ else
 
     async void OnSearchTextChanged(ChangeEventArgs changeEventArgs, string columnTitle)
     {
+        if (changeEventArgs == null)
+            return;
+
         switch (columnTitle.ToLower())
         {
             case "name":
