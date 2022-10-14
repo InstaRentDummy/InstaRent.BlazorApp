@@ -1,0 +1,88 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: logsdata
+  annotations:
+    volume.beta.kubernetes.io/storage-class: azure-disk
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instarent-blazorapp-deployment
+  labels:
+    app: instarent-blazorapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: instarent-blazorapp
+  template:
+    metadata:
+      labels:
+        app: instarent-blazorapp
+    spec:
+      containers:
+      - name: blazorapp
+        image: instarent.azurecr.io/instarentblazorapp:latest
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        env:
+        - name: ASPNETCORE_URLS
+          value: "https://+;http://+"
+        - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+          value: "8b6039b6-c67a-448b-977b-0ce6d3fcfd49"
+        - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+          value: "/dev-cert/localhost.pfx"
+        - name: App__SelfUrl
+          value: "https://app.instarentshop.com"
+        - name: App__BaseUrl
+          value: "https://webgateway.instarentshop.com"
+       
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+          
+        volumeMounts:
+        - mountPath: /dev-cert
+          name: dev-cert
+        - mountPath: /app/Logs
+          name: blazorapplogsdata 
+          subPathExpr: blazorapp/$(POD_NAME) 
+          
+      imagePullSecrets:
+      - name: regcred          
+      volumes:
+      - name: dev-cert
+        secret:
+          secretName: instranet-cert     
+      - name: blazorapplogsdata
+        persistentVolumeClaim:
+          claimName: logsdata        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blazorapp-service
+spec:
+  type: ClusterIP
+  selector:
+    app: instarent-blazorapp
+  ports:
+    - protocol: TCP
+      name: https
+      port: 443
+     # targetPort: 443
+     # nodePort: 32062 # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+    - protocol: TCP
+      name: http
+      port: 80
+     # targetPort: 80
+     # nodePort: 30062 # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)      
