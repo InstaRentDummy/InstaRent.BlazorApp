@@ -1,9 +1,13 @@
 ﻿@page "/payment"
 @using Blazored.LocalStorage
+@using InstaRent.BlazorApp.Services.Bags
+@using InstaRent.BlazorApp.Shared.Transactions
 @using InstaRent.Payment.Transactions
+@inject NavigationManager NavigationManager
 @inject ILocalStorageService localStorage
+@inject IBagService bagService
 
-@if (!orderPlaced)
+@*@if (!orderPlaced)
 {
     <h3>PaymentOrder</h3>
     if (loading)
@@ -29,9 +33,42 @@
         </div>
     }
 }
-else
-{
-    <h3>Thank you for your order!</h3>
+else*@
+@{
+    if (BagRatings == null)
+    {
+        <p>Loading....</p>
+    }
+    else
+    {
+        <h3>Thank you for your order!</h3>
+        <h4>Bag Reviews</h4>
+
+        <EditForm Model="BagRatings" OnValidSubmit="Rating" class="card card-body bg-light mt-2">
+            <div class="container flex-fill">
+                <div class="card">
+                    @foreach (var item in BagRatings)
+                    {
+                        <div class="row g-0">
+                            <div class="col-md-8">                                
+                                <div class="card-body">
+                                    <h5>@item.CartItem.BagName</h5>
+                                    <Rating Color="Color.Primary" @bind-SelectedValue="@item.RatingNo" MaxValue="5" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card-footer">
+                        <div style=" text-align: center; margin-top: 10px;">
+                            <button type="submit" class="btn btn-primary">Complete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+
 }
 
 
@@ -40,21 +77,50 @@ else
     bool orderPlaced = false;
     double totalAmount = 0;
     TransactionDto transactionDto;
+    List<BagRating> BagRatings;
+
+    private int value = 0;
+
+    [Parameter]
+    public EventCallback<int> BindingValueChanged { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         transactionDto = await localStorage.GetItemAsync<TransactionDto>("payment");
         //transactionDto = new();
-        totalAmount = transactionDto.Cart_Items.Sum(x => x.Price);
+        if (transactionDto != null)
+        {
+            Payment();
+        }
+        //totalAmount = transactionDto.Cart_Items.Sum(x => x.Price);
     }
 
     async void Payment()
     {
         loading = true;
         await localStorage.RemoveItemAsync("payment");
-        await Task.Delay(1000);
+        //await Task.Delay(1000);
+
+        BagRatings = new();
+
+        transactionDto.Cart_Items.ForEach(x => 
+        {
+            BagRatings.Add(new BagRating() 
+            {
+                CartItem = x,
+                RatingNo = 0,
+            });    
+        });
+
         orderPlaced = true;
         loading = false;
         StateHasChanged();
+    }
+
+    private async void Rating()
+    {
+        await bagService.AddBagRatingAsync(BagRatings);
+        NavigationManager.NavigateTo("");
     }
 }

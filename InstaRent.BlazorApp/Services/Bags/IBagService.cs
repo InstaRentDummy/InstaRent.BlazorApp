@@ -1,4 +1,5 @@
 ﻿using InstaRent.BlazorApp.Shared.Bags;
+using InstaRent.BlazorApp.Shared.Transactions;
 
 namespace InstaRent.BlazorApp.Services.Bags
 {
@@ -10,5 +11,6 @@ namespace InstaRent.BlazorApp.Services.Bags
         Task<HttpResponseMessage> Create(BagInfoDto BagDto);
         Task<HttpResponseMessage> Update(BagInfoDto BagDto);
         Task<HttpResponseMessage> Delete(string bagId);
+        Task AddBagRatingAsync(List<BagRating> bagList);
     }
 }

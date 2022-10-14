@@ -43,6 +43,7 @@
  
 <div class="container mt-3">
 
+
     @if (catalogService.Bags != null)
     {
         <div class="row gy-4">
@@ -51,19 +52,19 @@
             {
                 <div class="col-sm">
                     <div class="card h-100" style="min-width: 18rem; max-width: 18rem;">
-                        <img src="@bag.image_urls[0]" class="card-img-top" alt="...">
+                        <img src="@bag.ImageUrls[0]" class="card-img-top" alt="...">
                         <div class="card-body">
                             <a role="button" @onclick=@( () => ViewDetail(@bag.Id.ToString()) ) class="link-dark stretched-link ">
-                                <h6 class="card-subtitle text-dark mb-4"><strong>@bag.bag_name</strong></h6>
+                                <h6 class="card-subtitle text-dark mb-4"><strong>@bag.BagName</strong></h6>
                             </a>
-                            <p class="card-text crop-text-2"> @bag.description</p> 
+                            <p class="card-text crop-text-2"> @bag.Description</p> 
                             <div class="d-flex  justify-content-end bd-highlight align-middle">
-                                <cite class="text-success p-2">@bag.status at</cite>
+                                <cite class="text-success p-2">@bag.Status at</cite>
                                 <h5 class="badge bg-success rounded-pill p-2">
-                                    <i class="bi bi-tag me-1"></i>S$ @bag.price.ToString("N02")
-                                </h5>
+                                    <i class="bi bi-tag me-1"></i>S$ @bag.Price.ToString("N02")
+                                </h5>                                
                             </div>
-
+                            <Rating Color="Color.Primary" @bind-SelectedValue="@bag.AvgRating" MaxValue="5" />
                         </div>
                     </div>
                 </div>
@@ -72,7 +73,7 @@
 
         <div class="m-5">
             <div>
-                <InstaRent.BlazorApp.Components.Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+                <InstaRent.BlazorApp.Components.CustomPagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
             </div>
         </div>
     }
@@ -90,14 +91,16 @@
     public string ActivePage { get; set; }
     List<string> Pages = new List<string>() { "Trending", "Popular", "Recommend for you" };
 
-
-
     async Task ActivatePage(string page)
     {
         ActivePage = page;
-        await LoadList();
+        await LoadList();        
     }
 
+    int ConvertAverageRate(double? value)
+    {
+        return 3;  
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     { 
@@ -153,8 +156,8 @@
                 ActivePage = "Trending";//redirect to default;
         }
 
-            await catalogService.LoadCatalogs(categoryType: ActivePage,userId: uId, filterText: _searchValue);
-
+        await catalogService.LoadCatalogs(categoryType: ActivePage,userId: uId, filterText: _searchValue);
+        //SelectedValue = 3;
     }
 
 }

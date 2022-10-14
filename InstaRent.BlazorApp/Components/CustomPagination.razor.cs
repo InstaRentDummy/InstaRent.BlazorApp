@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace InstaRent.BlazorApp.Components
 {
-    public partial class Pagination
+    public partial class CustomPagination
     {
         [Parameter]
         public MetaData MetaData { get; set; }
