@@ -15,29 +15,25 @@
 }
 else
 {
-    
+
     <div class="container row">
-        <div id="carouselBag" class="carousel slide col-6  d-flex m-2" data-bs-ride="carousel" data-bs-wrap="true" data-bs-pause="false" data-interval="false" style="min-width: 20rem;" >
-            <div class="carousel-inner ">
+        <div class="col-6  d-flex m-2">
+            <Carousel @bind-SelectedSlide="@selectedSlide" Autoplay="false">
+
                 @{
-                    Boolean first = true;
+                    int i = 0;
                 }
                 @foreach (var img in bag.image_urls)
                 {
-                    <div class="carousel-item @( first ? "active" : "" )">
-                        <img src="@img" class="d-block w-100" alt="...">
-                    </div>
+                    i++;
+                    <CarouselSlide Name="@i.ToString()" Width="Width.Is100">
+                        <Image Source="@img" Text="Road image" Display="Display.Block" Width="Width.Is100" />
+                    </CarouselSlide>
                 }
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselBag" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselBag" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
+            </Carousel>
         </div>
+
+
         <div class="card col-3 d-flex" style="min-width: 20rem;">
 
             <div class="card-body">
@@ -48,7 +44,7 @@ else
                 </h5>
 
                 <div class="card border-dark mb-3">
-                 
+
                     <div class="card-body">
                         <h6>Rent Period: </h6> <DateRangePicker d MinDate="DateTimeOffset.Now" MaxDate="@bag.rental_end_date" OnRangeSelect="OnRangeSelect" />
                         <p class="card-text">No of Days : @totalDays</p>
@@ -63,21 +59,17 @@ else
                     <div class="card-footer text-white bg-dark">
                         Total: <span class="card-text">S$ @totalAmt.ToString("N02")</span>
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-light align-self-end" disabled=@blkAddToCart onclick ="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>@cartBtnName</small> </button>
+                            <button class="btn btn-light align-self-end" disabled=@blkAddToCart onclick="@AddtoCart"><i class="bi bi-cart-plus-fill"></i> <small>@cartBtnName</small> </button>
                         </div>
                     </div>
                     <div class="d-flex p-2">
                         <a href="/cart" class="link-dark">Go to Shopping Cart<i class="bi bi-arrow-right-square-fill ms-2"></i></a>
                     </div>
                 </div>
-                
-               
-
-               
             </div>
         </div>
     </div>
-
+     
 
 
 }
@@ -94,7 +86,7 @@ else
     private double totalAmt;
     private bool blkAddToCart;
     private DateRange _dateRange;
-    private List<DateRange> _blackoutDateRange=new List<DateRange>();
+    private List<DateRange> _blackoutDateRange = new List<DateRange>();
     private string cartBtnName;
     UserInfoDto localUser = new();
 
@@ -150,7 +142,7 @@ else
     {
         if (_dateRange != null)
         {
-           
+
             if (localUser == null)
             {
                 NavigationManager.NavigateTo($"/login");
