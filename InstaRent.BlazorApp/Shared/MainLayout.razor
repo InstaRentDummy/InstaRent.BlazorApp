@@ -109,6 +109,7 @@
     private async void Logout()
     {
         await localStorage.RemoveItemAsync("user");
+        await localStorage.RemoveItemAsync("username");
         await AuthStateProvider.GetAuthenticationStateAsync();
         NavigationManager.NavigateTo($"");
     }

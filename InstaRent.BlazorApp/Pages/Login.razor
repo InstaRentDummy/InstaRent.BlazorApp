@@ -58,9 +58,12 @@
 
             if (result != null)
             {
+                await LocalStorage.SetItemAsync<string>("username", result.Name);
                 await LocalStorage.SetItemAsync<UserInfoDto>("user", result);
+                
                 await AuthStateProvider.GetAuthenticationStateAsync();
                 _userService.StateChange();
+                
                 NavigationManager.NavigateTo("");
             }
             else
