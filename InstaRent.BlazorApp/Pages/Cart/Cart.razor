@@ -41,8 +41,7 @@ else
                             </div>
                         </div>
                         <div class="col-md-2">
-
-                            <button class="btn btn-outline-danger m-3" @onclick="@(() => DeleteItem(item))"><i class="bi bi-dash-circle-fill me-2"></i>Remove</button>
+                            <button type="button" class="btn btn-outline-danger m-3" @onclick="@(() => DeleteItem(item))"><i class="bi bi-dash-circle-fill me-2"></i>Remove</button>
                         </div>
                     </div>
                 }
@@ -77,11 +76,13 @@ else
         cartDto = await catalogService.GetCartItembyUserIdAsync(localUser.Email);
     }
 
-    private async Task DeleteItem(CartItemDto item)
+    private async void DeleteItem(CartItemDto item)
     {
         await catalogService.RemoveItemFromCartAsync(item.BagId.ToString(), localUser.Email);
-        //cartItems = await CartService.GetCartItems();
+        cartDto.Items.Remove(item);
+        StateHasChanged();
     }
+
 
     private async Task PlaceOrder()
     {

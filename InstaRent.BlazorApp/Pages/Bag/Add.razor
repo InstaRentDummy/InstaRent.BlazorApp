@@ -91,7 +91,7 @@ else
             @foreach (var item in bag.ImageUrls)
             {
                 <div>
-                    <button type="reset" class="btn-outline-secondary" @onclick="(() => RemoveImage(item))">X</button> @item
+                    <button type="button" class="btn-outline-secondary" @onclick="(() => RemoveImage(item))">X</button> @item
                 </div>
             }
         </div>
