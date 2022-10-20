@@ -35,8 +35,8 @@
             </div>
         </div>
 
-        <div class="form-check">
-            <label class="text-danger">@loginInfo.ErrorMessage</label>
+        <div class="alert alert-primary" hidden="@(string.IsNullOrEmpty(loginInfo.ErrorMessage))" role="alert">
+            @loginInfo.ErrorMessage
         </div>
 
         <NavLink href="/User/Add" class="mb-3 me-3">
@@ -53,7 +53,7 @@
     {
         try
         {
-            loginInfo.ErrorMessage = " ";
+            loginInfo.ErrorMessage = "";
             var result = await _userService.Login(loginInfo);
 
             if (result != null)

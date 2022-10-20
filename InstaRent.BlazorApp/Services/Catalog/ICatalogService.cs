@@ -9,7 +9,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
     {
         event Action OnAdd;
         public CatalogListDto Bags { get; set; }
-        Task LoadCatalogs(string categoryType = null, string userId = "", string filterText = "");
+        Task LoadCatalogs(int currentPage, string categoryType = null, string userId = "", string filterText = "");
         Task IncreaseViewCount(string bag_id);
         Task<BagDto?> GetbyId(string id);
         Task AddToCartAsync(BagDto bag, DateRange rentDateRange, string loginuserEmail);

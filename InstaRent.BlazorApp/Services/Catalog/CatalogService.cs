@@ -42,10 +42,9 @@ namespace InstaRent.BlazorApp.Services.Catalog
 
         }
 
-        public async Task LoadCatalogs(string categoryType = null, string userId = "", string filterText = "")
+        public async Task LoadCatalogs(int currentPage, string categoryType = null, string userId = "", string filterText = "")
         {
-
-            int currentPage = 1;
+            //int currentPage = 1;
             int _skipcount = _pageParameters.PageSize * (currentPage - 1);
             int _ttlcount = 0;
             string _url = "";
@@ -93,14 +92,16 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         break;
                     }
             }
+            var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
+            Bags.Meta = resutDto.MetaData;
 
-            Bags.Meta = new MetaData()
-            {
-                CurrentPage = currentPage,
-                PageSize = _pageParameters.PageSize,
-                TotalCount = (int)_ttlcount,
-                TotalPages = (int)_ttlcount / _pageParameters.PageSize
-            };
+            //Bags.Meta = new MetaData()
+            //{
+            //    CurrentPage = currentPage,
+            //    PageSize = _pageParameters.PageSize,
+            //    TotalCount = (int)_ttlcount,
+            //    TotalPages = (int)_ttlcount / _pageParameters.PageSize
+            //};
         }
 
         public async Task<BagDto?> GetbyId(string id)

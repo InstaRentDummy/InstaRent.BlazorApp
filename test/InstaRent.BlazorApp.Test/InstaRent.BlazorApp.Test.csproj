@@ -7,10 +7,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="BunitTestContext.cs" />
+	  <Compile Remove="CounterCSharpTests.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="Counter.razor" />
+	  <Content Remove="CounterRazorTests.razor" />
+	  <Content Remove="_Imports.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Using Include="Bunit" />
 		<Using Include="Bunit.TestDoubles" />
 		<Using Include="Microsoft.Extensions.DependencyInjection" />
-		<Using Include="NUnit.Framework"/>
+		<Using Include="NUnit.Framework" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -20,12 +31,18 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="Moq" Version="4.18.2" />
 	</ItemGroup>
 
 
 	<ItemGroup>
 		<PackageReference Include="NUnit" Version="3.13.2" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\InstaRent.BlazorApp\InstaRent.BlazorApp.csproj" />
 	</ItemGroup>
 
 
