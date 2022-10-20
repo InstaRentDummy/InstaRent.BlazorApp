@@ -50,7 +50,7 @@ namespace InstaRent.BlazorApp.Test
 
             submit.Click();
             var alert = component.Find("div.alert");
-            Assert.AreEqual(string.Empty, alert.InnerHtml);
+            Assert.AreEqual("Invalid Email or Password", alert.InnerHtml);
         }
 
     }
