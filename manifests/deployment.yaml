@@ -16,8 +16,7 @@ spec:
     spec:
       containers:
       - name: blazorapp
-        image: instarent.azurecr.io/instarentblazorapp:latest
-        imagePullPolicy: "Always"
+        image: instarent.azurecr.io/instarentblazorapp        
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -28,7 +27,8 @@ spec:
             cpu: 200m         
           
       imagePullSecrets:
-      - name: regcred              
+      - name: regcred     
+      imagePullPolicy: "Always"
 ---
 apiVersion: v1
 kind: Service
