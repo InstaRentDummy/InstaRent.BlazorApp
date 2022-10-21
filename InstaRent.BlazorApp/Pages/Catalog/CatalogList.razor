@@ -87,7 +87,7 @@
 
     public string _searchValue { get; set; }
     public MetaData MetaData { get; set; } = new MetaData();
-    private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
+    private PageParameters _pageParameters = new PageParameters() { PageSize = 8 };
     private List<BagInfoDto> bags;
     public string ActivePage { get; set; }
     List<string> Pages = new List<string>() { "Trending", "Popular", "Recommend for you" };
