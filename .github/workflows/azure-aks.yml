@@ -78,7 +78,6 @@ jobs:
     - name: Build and push image to ACR
       run: |
         az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} -f ./InstaRent.BlazorApp/Dockerfile .
-        az acr import --name ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io  --source ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:${{ github.sha }}  --image ${{ env.REPO_NAME }}
   createSecret:
     permissions:
       contents: read
