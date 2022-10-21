@@ -77,7 +77,8 @@ jobs:
     # Builds and pushes an image up to your Azure Container Registry
     - name: Build and push image to ACR
       run: |
-        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} -f ./InstaRent.BlazorApp/Dockerfile .
+        az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} -f ./InstaRent.BlazorApp/Dockerfile .
+        az acr import --name ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io  --source ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:${{ github.sha }}  --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:latest 
   createSecret:
     permissions:
       contents: read
@@ -154,6 +155,6 @@ jobs:
         action: deploy
         manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
         images: |
-          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}
+          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.REPO_NAME }}:${{ github.sha }}
         imagepullsecrets: |
           ${{ env.IMAGE_PULL_SECRET_NAME }}
