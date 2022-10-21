@@ -17,6 +17,7 @@ spec:
       containers:
       - name: blazorapp
         image: instarent.azurecr.io/instarentblazorapp:latest
+        imagePullPolicy: "Always"
         ports:
         - containerPort: 80
         - containerPort: 443
