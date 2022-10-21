@@ -5,6 +5,7 @@ using InstaRent.Cart.Services;
 using InstaRent.Catalog.DailyClicks;
 using InstaRent.Catalog.TotalClicks;
 using InstaRent.Payment.Transactions;
+using Microsoft.JSInterop;
 using System.Net.Http.Json;
 using Volo.Abp.Application.Dtos;
 using BagDto = InstaRent.Catalog.Bags.BagDto;
@@ -15,7 +16,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
     {
         private readonly HttpClient _http;
         string _url = "api/catalog";
-        private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
+        private PageParameters _pageParameters = new PageParameters() { PageSize = 8 };
         public event Action OnAdd;
 
         public CatalogListDto Bags { get; set; }
@@ -58,6 +59,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
                         if (response != null)
                         {
+                            Bags = new CatalogListDto();
                             Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
                             _ttlcount = (int)response.TotalCount;
                         }
@@ -66,11 +68,15 @@ namespace InstaRent.BlazorApp.Services.Catalog
                     }
                 case "Recommend for you":
                     {
-
+                        if(userId != null)
                         _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                        else
+                            _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+
                         var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
                         if (response != null)
                         {
+                            Bags = new CatalogListDto();
                             Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
                             _ttlcount = (int)response.TotalCount;
                         }
@@ -81,13 +87,10 @@ namespace InstaRent.BlazorApp.Services.Catalog
                         _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
                         var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
                         if (response != null)
-                        {
-                            List<BagInfoDto> _bags = new List<BagInfoDto>();
-                            var bag = response.Items.ToList();
-                            bag.ForEach(x => _bags.Add(ConvertInfo(x.Bag)));
+                        { 
                             Bags = new CatalogListDto();
-                            Bags.Items = _bags;
-                            _ttlcount = (int)response.TotalCount;
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
+                            _ttlcount = (int)response.TotalCount; 
                         }
                         break;
                     }
@@ -253,24 +256,31 @@ namespace InstaRent.BlazorApp.Services.Catalog
 
         private BagInfoDto ConvertInfo(BagDto? dto)
         {
-            BagInfoDto info = new();
+                BagInfoDto info = new();
 
-            if (dto != null)
+            try
             {
-                info.Id = dto.Id.ToString();
-                info.BagName = dto.bag_name;
-                info.Description = dto.description;
-                info.ImageUrls = dto.image_urls;
-                info.Price = dto.price;
-                info.Tags = dto.tags;
-                info.RentalStartDate = dto.rental_start_date;
-                info.RentalEndDate = dto.rental_end_date;
-                info.Status = dto.status;
-                info.RenterId = dto.renter_id;
-                info.AvgRating = dto.AvgRating == null ? 0 : Convert.ToInt32(dto.AvgRating);
+                if (dto != null)
+                {
+                    info.Id = dto.Id.ToString();
+                    info.BagName = dto.bag_name;
+                    info.Description = dto.description;
+                    info.ImageUrls = dto.image_urls;
+                    info.Price = dto.price;
+                    info.Tags = dto.tags;
+                    info.RentalStartDate = dto.rental_start_date;
+                    info.RentalEndDate = dto.rental_end_date;
+                    info.Status = dto.status;
+                    info.RenterId = dto.renter_id;
+                    info.AvgRating = dto.AvgRating == null ? 0 : Convert.ToInt32(dto.AvgRating);
+                }
             }
-
-            return info;
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+                return info;
+            
         }
     }
 }

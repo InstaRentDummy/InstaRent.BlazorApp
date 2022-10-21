@@ -72,6 +72,7 @@ namespace InstaRent.BlazorApp.Services.Bags
                 renter_id = bag.RenterId,
                 rental_start_date = bag.RentalStartDate,
                 rental_end_date = bag.RentalEndDate,
+                status =bag.Status
             });
         }
 
