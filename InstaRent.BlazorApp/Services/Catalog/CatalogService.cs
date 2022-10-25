@@ -1,4 +1,13 @@
-﻿using BagDto = InstaRent.Catalog.Bags.BagDto;
+﻿using BlazorDateRangePicker;
+using InstaRent.BlazorApp.Shared.Bags;
+using InstaRent.BlazorApp.Shared.Dto;
+using InstaRent.Cart.Services;
+using InstaRent.Catalog.DailyClicks;
+using InstaRent.Catalog.TotalClicks;
+using InstaRent.Payment.Transactions;
+using System.Net.Http.Json;
+using Volo.Abp.Application.Dtos;
+using BagDto = InstaRent.Catalog.Bags.BagDto;
 
 namespace InstaRent.BlazorApp.Services.Catalog
 {
@@ -89,13 +98,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
             var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
             Bags.Meta = resutDto.MetaData;
 
-            //Bags.Meta = new MetaData()
-            //{
-            //    CurrentPage = currentPage,
-            //    PageSize = _pageParameters.PageSize,
-            //    TotalCount = (int)_ttlcount,
-            //    TotalPages = (int)_ttlcount / _pageParameters.PageSize
-            //};
         }
 
         public async Task<BagDto?> GetbyId(string id)
