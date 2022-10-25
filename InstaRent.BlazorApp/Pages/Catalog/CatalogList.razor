@@ -92,15 +92,16 @@
 
 @code {
 
-    public string _searchValue { get; set; }
+    public string _searchValue { get; set; } = "";
 
     public MetaData MetaData { get; set; } = new();
     private PageParameters _pageParameters = new PageParameters() { PageSize = 8 };
-    
+
     [Parameter]
     public List<BagInfoDto> Bags { get; set; }
 
-    public string ActivePage { get; set; }
+
+    public string ActivePage { get; set; } = "";
     List<string> Pages = new List<string>() { "Trending", "Popular", "Recommend for you" };
 
     async Task ActivatePage(string page)
@@ -161,24 +162,32 @@
             Bags = new();
 
         var uId = "";
-        if (ActivePage == "Recommend for you")
+        if (ActivePage == "Recommend for you" || !string.IsNullOrEmpty(_searchValue.Trim()))
         {
 
             var localUser = await localStorage.GetItemAsync<UserInfoDto>("user");
-            if (localUser != null)
-                uId = localUser.Id;
-            else
+            if (localUser != null && localUser.Role == "Lessee")
+            { 
+                uId = localUser.Email;
+
+            }
+
+            else if (ActivePage == "Recommend for you")
                 ActivePage = "Trending";//redirect to default;
         }
 
         await catalogService.LoadCatalogs(_pageParameters.PageNumber, categoryType: ActivePage, userId: uId, filterText: _searchValue);
         //SelectedValue = 3;
-
+         
         if(catalogService.Bags != null && catalogService.Bags.Items != null)
         { 
             Bags = catalogService.Bags.Items;
             MetaData = catalogService.Bags.Meta;
-        }        
+        }     
+        if (!string.IsNullOrEmpty(uId) && !string.IsNullOrEmpty(_searchValue))
+        {
+            await catalogService.AddSearchTagforUser(uId, _searchValue);
+        }
     }
 
 }

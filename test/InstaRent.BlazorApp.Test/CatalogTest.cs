@@ -63,6 +63,8 @@ namespace InstaRent.BlazorApp.Test
                 TotalPages = 1,
             };
 
+            
+
             var component = testContext.RenderComponent<CatalogList>(parameters => parameters
                 .Add(p => p.Bags, _bags)
               );

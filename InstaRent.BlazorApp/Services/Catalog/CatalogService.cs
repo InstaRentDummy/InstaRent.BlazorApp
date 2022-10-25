@@ -4,7 +4,9 @@ using InstaRent.BlazorApp.Shared.Dto;
 using InstaRent.Cart.Services;
 using InstaRent.Catalog.DailyClicks;
 using InstaRent.Catalog.TotalClicks;
+using InstaRent.Catalog.UserPreferences;
 using InstaRent.Payment.Transactions;
+using Newtonsoft.Json;
 using System.Net.Http.Json;
 using Volo.Abp.Application.Dtos;
 using BagDto = InstaRent.Catalog.Bags.BagDto;
@@ -97,6 +99,8 @@ namespace InstaRent.BlazorApp.Services.Catalog
             }
             var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
             Bags.Meta = resutDto.MetaData;
+
+            
 
         }
 
@@ -273,6 +277,18 @@ namespace InstaRent.BlazorApp.Services.Catalog
                 Console.WriteLine(ex.Message);
             }
             return info;
+
+        }
+
+        public async Task AddSearchTagforUser(string uId, string tag)
+        {
+            UserPreferenceTagUpdateDto searchTag= new UserPreferenceTagUpdateDto();
+            searchTag.UserId = uId;
+            searchTag.Tags = new List<string>() { tag };
+            _url = $"api/catalog/userpreferences/updatetag";
+           
+            var response = await _http.PostAsJsonAsync<UserPreferenceTagUpdateDto>(_url, searchTag, CancellationToken.None);
+            
 
         }
     }

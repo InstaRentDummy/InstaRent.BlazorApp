@@ -1,6 +1,7 @@
 ﻿using BlazorDateRangePicker;
 using InstaRent.BlazorApp.Shared.Bags;
 using InstaRent.Cart.Services;
+using InstaRent.Catalog.UserPreferences;
 using BagDto = InstaRent.Catalog.Bags.BagDto;
 
 namespace InstaRent.BlazorApp.Services.Catalog
@@ -20,5 +21,6 @@ namespace InstaRent.BlazorApp.Services.Catalog
         Task<bool?> CheckExistsInCart(string lesseeId, string bagId);
         Task<List<DateRange>> BlackOutDates(string bagId);
         Task<bool> CheckRentedDate(string bagId, DateRange rentDateRange);
+        Task AddSearchTagforUser(string uId,string tag);
     }
 }
