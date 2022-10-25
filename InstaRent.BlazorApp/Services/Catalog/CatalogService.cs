@@ -48,60 +48,59 @@ namespace InstaRent.BlazorApp.Services.Catalog
             int _skipcount = _pageParameters.PageSize * (currentPage - 1);
             int _ttlcount = 0;
             string _url = "";
+            Bags = new CatalogListDto();
 
-
-            switch (categoryType)
+            try
             {
-                case "Popular":
-                    {
-                        _url = $"api/catalog/most-visited?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                        var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
-                        if (response != null)
+                switch (categoryType)
+                {
+                    case "Popular":
                         {
-                            Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
-                            _ttlcount = (int)response.TotalCount;
-                        }
+                            _url = $"api/catalog/most-visited?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                            var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
+                            if (response != null)
+                            {
+                                Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
+                                _ttlcount = (int)response.TotalCount;
+                            }
 
-                        break;
-                    }
-                case "Recommend for you":
-                    {
+                            break;
+                        }
+                    case "Recommend for you":
+                        {
 
-                        _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                        var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
-                        if (response != null)
-                        {
-                            Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
-                            _ttlcount = (int)response.TotalCount;
+                            _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                            var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
+                            if (response != null)
+                            {
+                                Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
+                                _ttlcount = (int)response.TotalCount;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                default:
-                    {
-                        _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                        var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
-                        if (response != null)
+                    default:
                         {
-                            List<BagInfoDto> _bags = new List<BagInfoDto>();
-                            var bag = response.Items.ToList();
-                            bag.ForEach(x => _bags.Add(ConvertInfo(x.Bag)));
-                            Bags = new CatalogListDto();
-                            Bags.Items = _bags;
-                            _ttlcount = (int)response.TotalCount;
+                            _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                            var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
+                            if (response != null)
+                            {
+                                List<BagInfoDto> _bags = new List<BagInfoDto>();
+                                var bag = response.Items.ToList();
+                                bag.ForEach(x => _bags.Add(ConvertInfo(x.Bag)));
+                                Bags = new CatalogListDto();
+                                Bags.Items = _bags;
+                                _ttlcount = (int)response.TotalCount;
+                            }
+                            break;
                         }
-                        break;
-                    }
+                }
+                var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
+                Bags.Meta = resutDto.MetaData;
             }
-            var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
-            Bags.Meta = resutDto.MetaData;
+            catch (Exception ex)
+            {
 
-            //Bags.Meta = new MetaData()
-            //{
-            //    CurrentPage = currentPage,
-            //    PageSize = _pageParameters.PageSize,
-            //    TotalCount = (int)_ttlcount,
-            //    TotalPages = (int)_ttlcount / _pageParameters.PageSize
-            //};
+            }
         }
 
         public async Task<BagDto?> GetbyId(string id)

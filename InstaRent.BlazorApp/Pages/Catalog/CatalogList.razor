@@ -44,14 +44,14 @@
 <div class="container mt-3">
 
 
-    @if (catalogService.Bags != null)
+    @if (Bags != null && Bags.Count > 0)
     {
         <div class="row gy-4">
 
-            @foreach (var bag in catalogService.Bags.Items)
+            @foreach (var bag in Bags)
             {
                 <div class="col-sm">
-                    <div class="card h-100" style="min-width: 18rem; max-width: 18rem;">
+                    <div class="card h-100" style="min-width: 18rem; max-width: 18rem;" >
                         <img src="@bag.ImageUrls[0]" class="card-img-top" alt="...">
                         <div class="card-body">
                             <a role="button" @onclick=@( () => ViewDetail(@bag.Id.ToString()) ) class="link-dark stretched-link ">
@@ -64,18 +64,25 @@
                                     <i class="bi bi-tag me-1"></i>S$ @bag.Price.ToString("N02")
                                 </h5>                                
                             </div>
-                            <Rating Color="Color.Primary" @bind-SelectedValue="@bag.AvgRating" MaxValue="5" />
+
+                            @if (bag.AvgRating >= 0)
+                            {
+                                <Rating Color="Color.Primary" @bind-SelectedValue="@bag.AvgRating" MaxValue="5" />
+                            }                            
                         </div>
                     </div>
                 </div>
             }
         </div>
 
-        <div class="m-5">
-            <div>
-                <InstaRent.BlazorApp.Components.CustomPagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        @if (MetaData != null)
+        {
+            <div class="m-5">
+                <div>
+                    <InstaRent.BlazorApp.Components.CustomPagination MetaData="MetaData" Spread="5" SelectedPage="SelectedPage" />
+                </div>
             </div>
-        </div>
+        }       
     }
     else
     {
@@ -86,9 +93,13 @@
 @code {
 
     public string _searchValue { get; set; }
-    public MetaData MetaData { get; set; } = new MetaData();
+
+    public MetaData MetaData { get; set; } = new();
     private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
-    private List<BagInfoDto> bags;
+    
+    [Parameter]
+    public List<BagInfoDto> Bags { get; set; }
+
     public string ActivePage { get; set; }
     List<string> Pages = new List<string>() { "Trending", "Popular", "Recommend for you" };
 
@@ -146,7 +157,9 @@
 
     async Task LoadList()
     {
-        catalogService.Bags = null;
+        if (MetaData.TotalCount > 1)
+            Bags = new();
+
         var uId = "";
         if (ActivePage == "Recommend for you")
         {
@@ -160,8 +173,12 @@
 
         await catalogService.LoadCatalogs(_pageParameters.PageNumber, categoryType: ActivePage, userId: uId, filterText: _searchValue);
         //SelectedValue = 3;
-        bags = catalogService.Bags.Items;
-        MetaData = catalogService.Bags.Meta;
+
+        if(catalogService.Bags != null && catalogService.Bags.Items != null)
+        { 
+            Bags = catalogService.Bags.Items;
+            MetaData = catalogService.Bags.Meta;
+        }        
     }
 
 }

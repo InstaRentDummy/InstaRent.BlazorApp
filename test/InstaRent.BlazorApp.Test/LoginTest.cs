@@ -1,7 +1,9 @@
 ﻿using Blazored.LocalStorage;
 using InstaRent.BlazorApp.Pages;
 using InstaRent.BlazorApp.Services.Users;
+using InstaRent.BlazorApp.Shared.Users;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Moq;
 using System;
 using System.Linq;
@@ -18,11 +20,15 @@ namespace InstaRent.BlazorApp.Test
         public void Setup()
         {
             testContext = new Bunit.TestContext();
+
             UserService = new Mock<IUserService>();
             LocalStorageService = new Mock<ILocalStorageService>();
+
+            UserService.Setup(_ => _.Login(It.Is<UserLoginInfoDto>(x => x.Email.Equals("lessee1@gmail.com") && x.Password.Equals("123456"))))
+            .ReturnsAsync(new Shared.Users.UserInfoDto());
             //testContext.Services.AddSingleton<IUserService>(new UserService(new HttpClient { BaseAddress = new Uri("https://localhost:44326/") }));
-            //Services.AddSingleton<NavigationManager>(new TestNav());
-            //Services.AddSingleton<FakeAuthenticationStateProvider>();
+            testContext.Services.AddSingleton<NavigationManager>(new TestNav());
+            testContext.Services.AddSingleton<AuthenticationStateProvider>(new CustomAuthStateProvider(LocalStorageService.Object));
         }
 
         [TearDown]
@@ -50,9 +56,31 @@ namespace InstaRent.BlazorApp.Test
 
             submit.Click();
             var alert = component.Find("div.alert");
-            Assert.AreEqual("Invalid Email or Password", alert.InnerHtml);
+            Assert.AreEqual(string.Empty, alert.InnerHtml);
         }
 
+
+        [Test]
+        public void ErrorLoginByLessee()
+        {
+            testContext.Services.AddScoped(x => UserService.Object);
+            testContext.Services.AddScoped(x => LocalStorageService.Object);
+
+            var component = testContext.RenderComponent<Login>();
+
+            var userName = component.Find("#username");
+            userName.Change("l1@gmail.com");
+
+            var password = component.Find("#password");
+            password.Change("111111");
+
+            var buttons = component.FindAll("button");
+            var submit = buttons.FirstOrDefault(x => x.OuterHtml.Contains("submit"));
+
+            submit.Click();
+            var alert = component.Find("div.alert");
+            Assert.AreEqual("Invalid Email or Password", alert.InnerHtml);
+        }
     }
 
     public class LocalStorageServiceProvider : IServiceProvider
@@ -80,4 +108,5 @@ namespace InstaRent.BlazorApp.Test
             NotifyLocationChanged(false);
         }
     }
+
 }
