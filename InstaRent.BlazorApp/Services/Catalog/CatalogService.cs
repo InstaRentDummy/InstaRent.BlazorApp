@@ -1,13 +1,4 @@
-﻿using BlazorDateRangePicker;
-using InstaRent.BlazorApp.Shared.Bags;
-using InstaRent.BlazorApp.Shared.Dto;
-using InstaRent.Cart.Services;
-using InstaRent.Catalog.DailyClicks;
-using InstaRent.Catalog.TotalClicks;
-using InstaRent.Payment.Transactions;
-using System.Net.Http.Json;
-using Volo.Abp.Application.Dtos;
-using BagDto = InstaRent.Catalog.Bags.BagDto;
+﻿using BagDto = InstaRent.Catalog.Bags.BagDto;
 
 namespace InstaRent.BlazorApp.Services.Catalog
 {
@@ -15,7 +6,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
     {
         private readonly HttpClient _http;
         string _url = "api/catalog";
-        private PageParameters _pageParameters = new PageParameters() { PageSize = 10 };
+        private PageParameters _pageParameters = new PageParameters() { PageSize = 8 };
         public event Action OnAdd;
 
         public CatalogListDto Bags { get; set; }
@@ -50,57 +41,61 @@ namespace InstaRent.BlazorApp.Services.Catalog
             string _url = "";
             Bags = new CatalogListDto();
 
-            try
+
+            switch (categoryType)
             {
-                switch (categoryType)
-                {
-                    case "Popular":
+                case "Popular":
+                    {
+                        _url = $"api/catalog/most-visited?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                        var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
+                        if (response != null)
                         {
-                            _url = $"api/catalog/most-visited?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                            var response = await _http.GetFromJsonAsync<PagedResultDto<TotalClickWithNavigationPropertiesDto>>(_url);
-                            if (response != null)
-                            {
-                                Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
-                                _ttlcount = (int)response.TotalCount;
-                            }
-
-                            break;
+                            Bags = new CatalogListDto();
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
+                            _ttlcount = (int)response.TotalCount;
                         }
-                    case "Recommend for you":
-                        {
 
+                        break;
+                    }
+                case "Recommend for you":
+                    {
+                        if (userId != null)
                             _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                            var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
-                            if (response != null)
-                            {
-                                Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
-                                _ttlcount = (int)response.TotalCount;
-                            }
-                            break;
-                        }
-                    default:
-                        {
+                        else
                             _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
-                            var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
-                            if (response != null)
-                            {
-                                List<BagInfoDto> _bags = new List<BagInfoDto>();
-                                var bag = response.Items.ToList();
-                                bag.ForEach(x => _bags.Add(ConvertInfo(x.Bag)));
-                                Bags = new CatalogListDto();
-                                Bags.Items = _bags;
-                                _ttlcount = (int)response.TotalCount;
-                            }
-                            break;
-                        }
-                }
-                var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
-                Bags.Meta = resutDto.MetaData;
-            }
-            catch (Exception ex)
-            {
 
+                        var response = await _http.GetFromJsonAsync<PagedResultDto<BagDto>>(_url);
+                        if (response != null)
+                        {
+                            Bags = new CatalogListDto();
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c)).ToList();
+                            _ttlcount = (int)response.TotalCount;
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                        var response = await _http.GetFromJsonAsync<PagedResultDto<DailyClickWithNavigationPropertiesDto>>(_url);
+                        if (response != null)
+                        {
+                            Bags = new CatalogListDto();
+                            Bags.Items = response.Items.Select(c => ConvertInfo(c.Bag)).ToList();
+                            _ttlcount = (int)response.TotalCount;
+                        }
+                        break;
+                    }
             }
+            var resutDto = PagedList<BagInfoDto>.ToPagedList(Bags.Items, _ttlcount, currentPage, _pageParameters.PageSize);
+            Bags.Meta = resutDto.MetaData;
+
+            //Bags.Meta = new MetaData()
+            //{
+            //    CurrentPage = currentPage,
+            //    PageSize = _pageParameters.PageSize,
+            //    TotalCount = (int)_ttlcount,
+            //    TotalPages = (int)_ttlcount / _pageParameters.PageSize
+            //};
         }
 
         public async Task<BagDto?> GetbyId(string id)
@@ -254,22 +249,29 @@ namespace InstaRent.BlazorApp.Services.Catalog
         {
             BagInfoDto info = new();
 
-            if (dto != null)
+            try
             {
-                info.Id = dto.Id.ToString();
-                info.BagName = dto.bag_name;
-                info.Description = dto.description;
-                info.ImageUrls = dto.image_urls;
-                info.Price = dto.price;
-                info.Tags = dto.tags;
-                info.RentalStartDate = dto.rental_start_date;
-                info.RentalEndDate = dto.rental_end_date;
-                info.Status = dto.status;
-                info.RenterId = dto.renter_id;
-                info.AvgRating = dto.AvgRating == null ? 0 : Convert.ToInt32(dto.AvgRating);
+                if (dto != null)
+                {
+                    info.Id = dto.Id.ToString();
+                    info.BagName = dto.bag_name;
+                    info.Description = dto.description;
+                    info.ImageUrls = dto.image_urls;
+                    info.Price = dto.price;
+                    info.Tags = dto.tags;
+                    info.RentalStartDate = dto.rental_start_date;
+                    info.RentalEndDate = dto.rental_end_date;
+                    info.Status = dto.status;
+                    info.RenterId = dto.renter_id;
+                    info.AvgRating = dto.AvgRating == null ? 0 : Convert.ToInt32(dto.AvgRating);
+                }
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             return info;
+
         }
     }
 }
