@@ -71,7 +71,7 @@ namespace InstaRent.BlazorApp.Services.Catalog
                 case "Recommend for you":
                     {
                         if (userId != null)
-                            _url = $"api/catalog/recommendations/{userId}?SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
+                            _url = $"api/catalog/recommendations?UserId={userId}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
                         else
                             _url = $"api/catalog/trending?FilterText={filterText}&SkipCount={_skipcount}&MaxResultCount={_pageParameters.PageSize}";
 
